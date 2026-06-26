@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>快速损益模拟系统 · 产品作品集 | 刘雪莹 Blanca</title>
+<style>
+  :root{
+    --ink:#1a1f36; --ink2:#4a5170; --muted:#7c849e; --line:#e7e9f2;
+    --accent:#2d3a8c; --accent2:#5a6cff; --bg:#f6f7fb; --card:#ffffff;
+    --good:#1f9d6b; --warn:#c9772b; --soft:#eef0fb;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+    color:var(--ink);background:var(--bg);line-height:1.75;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:980px;margin:0 auto;padding:0 22px}
+
+  /* hero */
+  header.hero{background:linear-gradient(135deg,#222a63 0%,#2d3a8c 55%,#3d4db0 100%);color:#fff;padding:54px 0 38px}
+  .hero .tag{display:inline-block;font-size:12.5px;letter-spacing:.14em;text-transform:uppercase;
+    background:rgba(255,255,255,.15);padding:5px 12px;border-radius:30px;margin-bottom:16px}
+  .hero h1{font-size:33px;line-height:1.25;font-weight:800;letter-spacing:-.5px}
+  .hero h1 small{display:block;font-size:16px;font-weight:500;opacity:.82;margin-top:8px;letter-spacing:.02em}
+  .hero p.sub{margin-top:16px;font-size:16px;max-width:680px;opacity:.94}
+  .hero .who{margin-top:20px;font-size:14px;opacity:.8}
+  .stats{display:flex;flex-wrap:wrap;gap:14px;margin-top:28px}
+  .stat{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.16);border-radius:12px;
+    padding:12px 16px;min-width:120px;flex:1}
+  .stat b{display:block;font-size:21px;font-weight:800}
+  .stat span{font-size:12px;opacity:.82}
+
+  /* nav */
+  nav.tabs{position:sticky;top:0;z-index:20;background:rgba(255,255,255,.92);backdrop-filter:blur(8px);
+    border-bottom:1px solid var(--line)}
+  .tabs .wrap{display:flex;gap:4px;overflow-x:auto}
+  .tabs button{appearance:none;border:none;background:none;font:inherit;cursor:pointer;color:var(--ink2);
+    padding:15px 16px 13px;font-size:14.5px;font-weight:600;border-bottom:2.5px solid transparent;white-space:nowrap;transition:.15s}
+  .tabs button:hover{color:var(--accent)}
+  .tabs button.active{color:var(--accent);border-color:var(--accent)}
+
+  main{padding:34px 0 70px}
+  section.doc{display:none;animation:fade .35s ease}
+  section.doc.active{display:block}
+  @keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+  .doc h2{font-size:25px;font-weight:800;letter-spacing:-.3px;margin-bottom:6px}
+  .doc .lead{color:var(--ink2);font-size:15.5px;margin-bottom:24px}
+  .doc h3{font-size:18px;font-weight:700;margin:30px 0 10px;padding-top:6px}
+  .doc h4{font-size:15px;font-weight:700;margin:20px 0 6px;color:var(--accent)}
+  .doc p{margin:10px 0;color:#2a3050}
+  .doc ul{margin:10px 0 10px 4px;list-style:none}
+  .doc ul li{position:relative;padding-left:20px;margin:7px 0;color:#2a3050}
+  .doc ul li:before{content:"";position:absolute;left:3px;top:11px;width:6px;height:6px;border-radius:50%;background:var(--accent2)}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:22px 24px;margin:18px 0;
+    box-shadow:0 1px 3px rgba(26,31,54,.04)}
+  .callout{border-left:4px solid var(--accent2);background:var(--soft);border-radius:0 12px 12px 0;padding:14px 18px;margin:16px 0;font-size:14.5px}
+  .quote{font-size:17px;font-weight:600;color:var(--accent);line-height:1.6;margin:16px 0;padding-left:16px;border-left:3px solid var(--accent2)}
+
+  table{width:100%;border-collapse:collapse;margin:16px 0;font-size:13.5px}
+  th,td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+  th{background:var(--soft);color:var(--accent);font-weight:700;font-size:12.5px}
+  td.win{color:var(--good);font-weight:600}
+  td.gap{color:var(--warn)}
+  tr td:first-child{font-weight:600;color:var(--ink)}
+
+  .pills{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0}
+  .pill{font-size:12.5px;background:var(--soft);color:var(--accent);border-radius:20px;padding:4px 12px;font-weight:600}
+
+  .timeline{border-left:2px solid var(--line);margin:14px 0 14px 6px;padding-left:22px}
+  .tl{position:relative;margin:18px 0}
+  .tl:before{content:"";position:absolute;left:-29px;top:4px;width:11px;height:11px;border-radius:50%;background:var(--accent);border:3px solid #fff;box-shadow:0 0 0 1px var(--line)}
+  .tl .when{font-size:12px;font-weight:700;color:var(--accent2);letter-spacing:.04em}
+  .tl .what{font-weight:700;margin-top:2px}
+
+  .matrix{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin:16px 0}
+  .qd{border:1px solid var(--line);border-radius:12px;padding:14px;font-size:13px;background:#fff;min-height:96px}
+  .qd b{display:block;margin-bottom:4px;font-size:13px}
+  .qd.me{background:linear-gradient(135deg,#eef0fb,#e3e7ff);border-color:#c5ccff}
+  .qd.me b{color:var(--accent)}
+
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media(max-width:640px){.grid2,.matrix{grid-template-columns:1fr}.hero h1{font-size:26px}}
+
+  footer{border-top:1px solid var(--line);padding:24px 0;color:var(--muted);font-size:13px;text-align:center}
+  .kpi{display:inline-block;background:var(--soft);color:var(--accent);font-weight:700;border-radius:6px;padding:1px 7px;font-size:.95em}
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="wrap">
+    <span class="tag">Product Management Case Study</span>
+    <h1>快速损益模拟系统 · Profit Calculator
+      <small>一个产品经理，用 AI 从 0 到 1 搭建的演出巡演预算工具</small></h1>
+    <p class="sub">把一份原本要 2–3 天手工拉的巡演损益表，压缩到 2–3 小时；在没有工程师的情况下，靠行业知识、数据治理、需求纪律和 AI 协作，做出一个「连资深主办都愿意用」的工具。</p>
+    <p class="who">刘雪莹 Blanca · 产品经理 ｜ 演出行业 8 年经验 · 自驱独立项目 · 2026</p>
+    <div class="stats">
+      <div class="stat"><b>2–3 天 → 2–3 时</b><span>巡演预算编制提速</span></div>
+      <div class="stat"><b>65 项 / 13 组</b><span>成本结构覆盖</span></div>
+      <div class="stat"><b>200+ 场馆 / 33 城</b><span>内置数据库</span></div>
+      <div class="stat"><b>16 份真实 P&amp;L</b><span>准确性验证</span></div>
+      <div class="stat"><b>90+ 版本</b><span>迭代至 v3.8.86</span></div>
+    </div>
+  </div>
+</header>
+
+<nav class="tabs">
+  <div class="wrap">
+    <button class="active" data-t="case">📌 案例展示</button>
+    <button data-t="comp">⚔️ 竞品分析</button>
+    <button data-t="road">🗺️ 产品路线图</button>
+    <button data-t="prd">📋 PRD 需求文档</button>
+  </div>
+</nav>
+
+<main class="wrap">
+
+<!-- ===================== 案例展示 ===================== -->
+<section class="doc active" id="case">
+  <h2>产品案例展示</h2>
+  <p class="lead">从 0 到 1 用 AI 搭建演出预算系统 · 一次失败的预测系统，如何转身成一个可用的损益工具</p>
+
+  <div class="card">
+    <h4>摘要</h4>
+    <p>本案例记录了我如何在中国现场音乐行业里识别一个核心痛点，从一个走不通的机器学习构想果断 pivot，并在<b>零工程团队</b>的条件下，用 AI 工具搭出一个可用的巡演预算系统。系统覆盖 <span class="kpi">13 组 65 个成本项</span>，内置 <span class="kpi">200+ 个场馆</span>，并经过 <span class="kpi">16 份真实巡演 P&amp;L</span> 验证。它把巡演预算编制从 2–3 天压缩到约 2–3 小时——更重要的是，它让一些以前「做不到」的事变得可行：在几分钟内对比不同场馆组合、不同档期、不同票价策略下的利润结构。</p>
+  </div>
+
+  <h3>一、问题与背景</h3>
+  <h4>The Pivot：从「票房预测」到「损益模拟」</h4>
+  <p>这个项目最初叫「票房预测引擎」。想法很直接：用机器学习预测任意艺人在任意中国城市的售票情况，让公司在签约前就有数据驱动的判断力。我花了几周收集历史售票数据、做特征工程、搭原型。</p>
+  <p>两个问题让我停了下来。第一，<b>数据根本不够</b>——演出不像互联网产品每天产生上百万条日志，即使是国内最活跃的主办方，一年也就做十几场巡演，每场还高度依赖艺人类型、市场周期、营销投入等难以量化的变量。第二，也更关键：和团队聊过之后我意识到，<b>没人需要一个模型来告诉他们能卖多少票</b>——有经验的 PM 凭直觉就知道「这种艺人做 Livehouse，卖得完」。</p>
+  <p class="quote">真正的问题不是「能卖多少票」，而是「卖完之后，到底赚不赚钱？最多能给艺人报多少保底？换个场馆利润差多少？这站从周五改周六，多出来的场租换那 100 个观众值不值？」——这些问题，当时没有任何工具能快速回答。</p>
+  <p>于是我 pivot 了。不是跳到一个不相关的领域，而是在同一个大方向上，找到了痛点更精准的位置：<b>从预测票房，转向模拟损益。</b>这个 pivot 本身，是整段经历里最「产品经理」的一个决定。</p>
+
+  <h4>真实痛点：为什么 Excel 不够用</h4>
+  <p>在 Demo Live Entertainment 做巡演执行的两年多里，每做一次预算都像一次「考古」。一个 8 城巡演要查 8 个城市的场馆报价，每个场馆又分周五 / 周六 / 周日 / 工作日四档价格，散落在不同的 Excel 甚至去年的 PDF 里。成本项多达 65 项，每一项都要手动填。<b>改一个变量——换场馆、把某站从周五挪到周六——整张预算几乎要重算一遍。</b></p>
+  <p>公司积累了 16 份历史巡演 P&amp;L、300+ 场馆数据，但它们全都躺在不同人电脑里的孤立 Excel 文件中。每个新方案都得从头来过。海外有 Greencopper、Prism 这样的产品，但它们是为欧美市场设计的——场馆体系、成本结构（报批费、安保、中国票务平台费率）、运营流程完全不同。<b>市面上没有一个适配中国的工具。</b></p>
+
+  <h3>二、三个关键产品决策</h3>
+  <div class="grid2">
+    <div class="card"><h4>决策一 · 票档从「百分比」改为「固定张数」</h4>
+      <p>早期原型用百分比设票档（VIP 占 5%、GA 占 85%），数据模型很干净。但真实测试时发现：<b>主办方不按百分比思考，他们按张数</b>——「VIP 50 张、快通 50 张、其余 GA」。百分比模式逼用户每次都在脑子里做一层换算。改成固定张数后，系统输出和票务平台直接对齐，少了一层心智负担。</p></div>
+    <div class="card"><h4>决策二 · 场馆租金按「星期」联动</h4>
+      <p>同一个场馆，周六可能比工作日贵一倍。巡演排期有个常见策略：大城市放平日（反正卖得动、省场租），小城市放周末（观众只在周末出门）。系统选好场馆和日期后<b>自动套用对应租金档</b>并即时反映在 P&amp;L 上——改档期，成本变化立刻可见。</p></div>
+  </div>
+  <div class="card"><h4>决策三 · 所有自动填充值，用户都能改</h4>
+    <p>这成了贯穿系统的设计原则。工具从供应商数据库拉默认值、自动计算，但<b>从不锁死任何字段</b>。真实世界里场馆会给特殊折扣、供应商会临时调价、PM 可能对某城更了解。每个自动值都能手动覆盖。这条原则也划定了系统边界：<b>它负责「估算」——这个项目财务上能不能成；而「执行」——选供应商、谈价格、评质量——永远是 PM 的领域。</b></p></div>
+
+  <h3>三、用 AI 驱动的开发</h3>
+  <p>这个项目最不寻常的地方：<b>没有工程师团队</b>。一个 PM——我自己——用 AI 作为开发伙伴，从零搭起一个 2,400+ 行的可运行系统。</p>
+  <h4>工具链与分工</h4>
+  <p>核心开发由 Claude 完成（代码实现、架构设计、计算逻辑）；Hermes AI 负责数据层（300+ 场馆 Excel 转 JSON、映射表整理）。我的角色是：需求定义、业务逻辑验证、数据采集（打电话问场馆报价、向供应商要价格表）、用户测试（我本身就是目标用户）、优先级决策。工作方式是一轮轮紧密的反馈循环：<b>我用真实数据测试 → 写反馈文档 → Claude 改代码 → 我再验证。</b></p>
+  <h4>AI 替代不了的部分</h4>
+  <p>这个过程让我看清 AI 的边界。它写代码很快，但它不知道「Livehouse 不买保险」这类行业知识；不知道某些场馆档期要提前三个月定；读不懂供应商报价里的隐含条款（含不含税？含不含搬运？）。<b>AI 替代的是编码劳动，替代不了行业经验带来的判断力。</b></p>
+
+  <h3>四、产品现状与成果</h3>
+  <p>系统现已覆盖 13 个成本组、65 个成本项，内置 200+ 场馆（覆盖 33 城），支持自动成本联动、损益模拟、回本点分析、多城巡演汇总，并扩展出：<b>三语界面（中 / 英 / 西）、币种切换（¥ / $ / €）、我方 Offer 测算引擎、实时 P&amp;L、敏感性分析、一键导出 Deal Memo 与整页 PDF</b>。准确性经 16 份真实巡演 P&amp;L（Wren、Aria Vale、Jordan Reese、Mira Lune 等艺人）验证。</p>
+  <ul>
+    <li><b>提速：</b>一个 8 城巡演预算从 2–3 天 → 约 2–3 小时。</li>
+    <li><b>解锁新能力：</b>10 分钟内对比三套场馆组合的利润差异——这在以前要花大半天重做预算，所以根本没人做。</li>
+    <li><b>工程化迭代：</b>从 v1.0 到 v3.8.86，90+ 个版本；最后阶段「一个问题修透再下一个」，每版用 golden master（demo 利润精确到分）守恒，保证大改不改坏数字。</li>
+  </ul>
+
+  <h3>五、反思与学习</h3>
+  <div class="callout">以下为初稿，建议你按面试语气改写成第一人称叙事。</div>
+  <h4>这个项目让我对产品管理最大的认识</h4>
+  <p>产品经理的核心价值不在于「做出一个东西」，而在于<b>把模糊的「想要什么」翻译成可验证的逻辑和验收标准</b>。早期我只用描述性语言跟 AI 提需求，结果反复偏差——直到我开始写清楚每个字段的计算公式和边界条件，产出才稳定。这正是 PRD 的意义。</p>
+  <h4>如果重来，我会改变什么</h4>
+  <p>我会<b>更早做可行性验证、更晚投入建设</b>。预测系统的失败本可以在几天的数据体检里就预见，而不是花几周搭原型之后才发现。先证伪，再投入。</p>
+  <h4>AI 如何改变了我作为 PM 的工作方式</h4>
+  <p>它把我从「写不写得出来」的焦虑里解放出来，让我能把精力放回真正属于 PM 的地方：判断什么该做、定义清楚逻辑、守住数据的单一可信源。<b>AI 协作的本质是「你定义逻辑、AI 执行落地」——你是产品负责人，不是甩需求的人。</b></p>
+</section>
+
+<!-- ===================== 竞品分析 ===================== -->
+<section class="doc" id="comp">
+  <h2>竞品分析与产品定位</h2>
+  <p class="lead">在「演出运营软件」这个看似拥挤的赛道里，为什么仍然没有一个适配中国主办方「立项前快速算账」的工具</p>
+
+  <div class="card">
+    <h4>市场现状</h4>
+    <p>现场音乐的运营软件并不少，但它们大多解决<b>「执行 / 履约 / 结算」</b>的问题，面向欧美成熟市场。真正属于中国主办方在<b>「签约前几小时内，快速判断一个项目赚不赚钱」</b>这个场景的工具，几乎是空白——大多数人至今还在用 Excel。</p>
+  </div>
+
+  <h3>主要竞品对比</h3>
+  <table>
+    <thead><tr><th>产品</th><th>定位</th><th>核心能力</th><th>目标市场</th><th>中国成本结构适配</th><th>形态 / 价格</th></tr></thead>
+    <tbody>
+      <tr><td>Excel / 人工<br><span style="color:var(--muted);font-weight:400">（现状）</span></td><td>通用电子表格</td><td>极度灵活，但全靠手工</td><td>全球</td><td class="gap">无内置默认值，全靠经验</td><td>免费 / 慢、易错、无单一可信源</td></tr>
+      <tr><td>Prism.fm</td><td>场馆 & 主办 一体化运营平台</td><td>排期、Offer 生成、结算、财务报表、联合主办分账</td><td class="gap">欧美（1,500+ 场馆）</td><td class="gap">为欧美场馆 / 成本体系设计</td><td>SaaS 订阅 · 重</td></tr>
+      <tr><td>Master Tour<br><span style="color:var(--muted);font-weight:400">(Eventric)</span></td><td>巡演执行 / 行程管理</td><td>行程表、Day Sheet、路线、当晚结算导出</td><td class="gap">欧美巡演团队</td><td class="gap">面向「执行中」而非「立项前」</td><td>$64.99/月</td></tr>
+      <tr><td>Greencopper</td><td>音乐节 / 活动 App & 无现金支付</td><td>观众端 App、票务、现场体验</td><td class="gap">欧美音乐节</td><td class="gap">非预算 / 损益场景</td><td>项目制</td></tr>
+      <tr><td>国内票务平台<br><span style="color:var(--muted);font-weight:400">大麦 / 秀动</span></td><td>票务分销</td><td>售票、分销、结算入口</td><td>中国</td><td class="gap">只管「卖票」，不管「立项算账」</td><td>抽佣</td></tr>
+      <tr style="background:#f3f5ff"><td style="color:var(--accent)">快速损益模拟系统</td><td class="win">立项前快速 P&amp;L 估算</td><td class="win">中国成本结构 + 星期联动场租 + 可覆盖默认值 + Offer 测算</td><td class="win">中国 Livehouse 主办</td><td class="win">原生适配（报批 / 安保 / 票务费率 / 签证 / 地面交通）</td><td class="win">单 HTML · 免登录 · 免费</td></tr>
+    </tbody>
+  </table>
+
+  <h3>定位地图</h3>
+  <p>用两个维度切分赛道：横轴「面向立项前估算 vs 面向执行 / 全栈运营」，纵轴「适配中国成本结构 vs 为欧美设计」。<b>右上角——快速、面向立项、且原生适配中国——是一个空白象限。</b></p>
+  <div class="matrix">
+    <div class="qd me"><b>立项前估算 × 中国适配</b>快速损益模拟系统 ✅<br><span style="color:var(--muted)">（当前空白象限）</span></div>
+    <div class="qd"><b>全栈运营 × 中国适配</b>大麦 / 秀动（仅票务环节）</div>
+    <div class="qd"><b>立项前估算 × 欧美</b>Excel 模板、部分 Offer 工具</div>
+    <div class="qd"><b>全栈运营 × 欧美</b>Prism.fm · Master Tour · Greencopper</div>
+  </div>
+
+  <h3>差异化与壁垒</h3>
+  <ul>
+    <li><b>中国成本结构原生适配：</b>报批费按城市行政级别、安保按场馆费率、票务平台费率、签证类型、地面交通车型——这些是海外工具里根本不存在的字段。</li>
+    <li><b>数据壁垒：</b>200+ 场馆、16 份真实 P&amp;L 沉淀出的成本参考区间，是靠实地采集和历史项目积累的，难以快速复制。</li>
+    <li><b>场景纯粹：</b>不做排期、不做履约、不做结算——只把「立项前算账」这一刀做到又快又准，反而避开了与全栈平台的正面竞争。</li>
+    <li><b>零摩擦形态：</b>单 HTML 文件、无后端、无登录，邮件 / 微信转发即可协作，完全贴合中国主办方的实际工作流。</li>
+  </ul>
+  <div class="callout">一句话定位：<b>给中国 Livehouse 主办方的「立项前 P&amp;L 计算器」——几小时内算清一个巡演赚不赚钱，把精力省给真正需要判断力的地方。</b></div>
+</section>
+
+<!-- ===================== 路线图 ===================== -->
+<section class="doc" id="road">
+  <h2>产品路线图</h2>
+  <p class="lead">面向中国现场音乐主办方的单文件 P&amp;L 规划工具 · 从一次 pivot 到 90+ 版本迭代</p>
+
+  <div class="card">
+    <h4>产品定位</h4>
+    <p>Phase 1 聚焦 Livehouse 规模（800–2,000 人），帮主办方在 Offer 阶段几分钟内完成损益模拟、评估可行性。技术上：<b>单 HTML 文件，无需后端、无需登录</b>，浏览器打开即用，存取通过 JSON 文件下载 / 导入实现，每次保存生成独立版本文件。</p>
+  </div>
+
+  <h3>项目起源与 Pivot</h3>
+  <p>项目起点是一个更宏大的想法——<b>票房预测系统</b>。在用已知数据验证时发现预测与真实票房完全对不上，复盘后归因为三点：数据严重不足、与 AI 的协作只停在描述性语言、以及方向本身存疑（票房预测极难验证）。</p>
+  <p class="quote">这次 pivot 的核心洞察：系统的价值不在于预测不确定的事，而在于把确定的事做得足够快、足够准——让主办方把精力省给真正需要判断力的地方。</p>
+
+  <h3>版本里程碑</h3>
+  <div class="timeline">
+    <div class="tl"><div class="when">Pre-v1 · 2026-05</div><div class="what">数据基建</div>4 个核心数据库：Offer 分析（53 位艺人 / 114 经纪联系人）、供应商报价（12 品类）、场馆库（300+ 场馆）、推荐引擎（25 场记录）。确立原则：所有默认值来自真实历史数据。</div>
+    <div class="tl"><div class="when">v1.0 · 2026-05-12</div><div class="what">系统初始构建</div>7 步向导、核心计算引擎（净票房 / 净潜力 / N35 占比 / 盈亏平衡上座率）、敏感性分析、JSON 存取、中英切换。</div>
+    <div class="tl"><div class="when">v1.x–v2.x · 2026-05</div><div class="what">用户反馈驱动重构</div>Tab 向导 → 单页滚动；票务从百分比 → 固定张数；演出规划改月历视图；主办成本按真实 P&amp;L 重建（12 组 50+ 细项）。</div>
+    <div class="tl"><div class="when">v3.7.x · 2026-06</div><div class="what">架构治本 + 逐个击破</div>R1–R3 单一 render 重构，根治输入框丢焦点 / 不刷新；立下「一个问题修透再下一个」纪律 + golden master 回归守恒。</div>
+    <div class="tl"><div class="when">v3.8.x · 2026-06（现状 v3.8.86）</div><div class="what">国际化 + 导出 + Offer 引擎</div>三语（中 / 英 / 西）+ 币种切换（¥/$/€）；整页 PDF（封面 / 目录 / 页码）+ Deal Memo（含落袋 Walk-out）；我方 Offer 测算引擎、建议保底可编辑联动评级、利润保护垫可编辑。</div>
+  </div>
+
+  <h3>Phase 2 规划（待排期）</h3>
+  <table>
+    <thead><tr><th>功能</th><th>背景</th><th>优先级</th></tr></thead>
+    <tbody>
+      <tr><td>Settlement 结算模块</td><td>演出后与艺人方实际结算，预算 vs 实际逐城对账</td><td class="win">高</td></tr>
+      <tr><td>场馆推荐引擎</td><td>按艺人级别 + 城市推荐候选场馆及历史成本（数据库已建好）</td><td class="win">高</td></tr>
+      <tr><td>币种全量换算（#52）</td><td>所有可编辑金额随币种换算、回写 CNY</td><td>高</td></tr>
+      <tr><td>离线导出（#45）</td><td>内联 html2pdf，去 CDN 依赖</td><td>中</td></tr>
+      <tr><td>Travel Day 自动识别</td><td>按城市间距离自动推算转场日及相关成本</td><td>中</td></tr>
+      <tr><td>反向秀费测算</td><td>给定目标利润率，反推最多能给艺人多少保底</td><td>中</td></tr>
+      <tr><td>Arena / Stadium 扩展</td><td>大型制作成本行，适配 5,000 人+ 场馆</td><td>中</td></tr>
+    </tbody>
+  </table>
+
+  <h3>Phase 3 规划（长期）</h3>
+  <ul>
+    <li><b>票房收入区间预测：</b>从 Phase 1 放弃的核心功能降级而来。待成本系统完善、用户建立信任后，以「模糊区间」形式重新引入。</li>
+    <li><b>实时供应商报价拉取：</b>对接酒店 / 机票 API，自动填入当期报价，节假日自动提示价格波动。</li>
+  </ul>
+
+  <h3>产品设计原则</h3>
+  <div class="pills">
+    <span class="pill">真实数据优先</span><span class="pill">降低记忆负担</span><span class="pill">透明计算（公式可验算）</span><span class="pill">术语严谨</span><span class="pill">快速是前提</span><span class="pill">版本可追溯</span>
+  </div>
+</section>
+
+<!-- ===================== PRD ===================== -->
+<section class="doc" id="prd">
+  <h2>产品需求文档 PRD</h2>
+  <p class="lead">Phase 1 · Livehouse ｜ 描述截至 v3.8.86 的已交付范围</p>
+
+  <h3>一、产品背景</h3>
+  <p>演出主办方在立项阶段需要快速判断一个项目是否值得推进，核心问题只有一个：<b>这场演出能不能赚钱？</b>但回答它要同时处理十几个成本模块（场租、制作、Backline、交通、酒店、签证、报批、营销、票务费率……），加上艺人 Guarantee 的货币换算、各档票价的上座率敏感性——手工估算容易出错，且难以快速迭代不同假设。</p>
+  <div class="callout">核心价值主张：<b>准确性优先，速度是副产品。</b>系统内嵌真实市场价格参考区间，不依赖用户自己估数字；系统提供数据与计算，不替用户做判断。</div>
+
+  <h3>二、目标用户</h3>
+  <ul>
+    <li><b>主要用户：</b>演出行业项目经理——负责 Livehouse 级别国际艺人来华演出的前期立项预算，有一定经验但不具备资深制作人的成本积累。</li>
+    <li><b>演示用户：</b>求职 / 面试场景下展示 PM 作品集。</li>
+  </ul>
+
+  <h3>三、Phase 1 范围边界</h3>
+  <table>
+    <thead><tr><th>维度</th><th>Phase 1 范围</th><th>超出范围（Phase 2+）</th></tr></thead>
+    <tbody>
+      <tr><td>场馆规模</td><td>Livehouse（800–2,000 人）</td><td>Arena（5,000+）、Stadium</td></tr>
+      <tr><td>艺人等级</td><td>B / C / D 级为主</td><td>超 A / S 级大体量制作</td></tr>
+      <tr><td>使用人数</td><td>单用户</td><td>多人协作、账号体系</td></tr>
+      <tr><td>数据共享</td><td>JSON 文件下载 / 导入</td><td>云端存储、项目共享链接</td></tr>
+      <tr><td>结算对比</td><td>无</td><td>Settlement 模块（预算 vs 实际）</td></tr>
+    </tbody>
+  </table>
+
+  <h3>四、核心工作流</h3>
+  <p>系统采用<b>单页滚动</b>布局，6 个 Section 顺序填写，Intersection Observer 驱动左侧导航高亮：</p>
+  <div class="card" style="font-family:ui-monospace,Menlo,monospace;font-size:13px;line-height:2.1;color:var(--ink2)">
+    Section 0 · 项目信息 ↓<br>
+    Section 1 · 演出规划（月历视图）↓<br>
+    Section 2 · 票务设置（多档票价 + VIP）↓<br>
+    Section 3 · 演出成本（13 组 65 细项）↓<br>
+    Section 4 · 损益结果（核心 KPI 卡片）↓<br>
+    Section 5 · 汇总方案（我方 Offer 测算 + 敏感性 + 截止提醒）
+  </div>
+
+  <h3>五、功能模块详述</h3>
+  <h4>Section 0 · 项目信息</h4>
+  <p>项目名称、场馆级别、乐队人数、艺人经纪公司、汇率（全局，Header 可改）、票务平台手续费率（默认 4% 秀动）、预提所得税率 WHT（默认 10%）。</p>
+  <h4>Section 1 · 演出规划</h4>
+  <p>月历视图：点击日期弹窗填城市 / 场馆 / 容量；跨月巡演自动显示连续月份；日期含星期与日类型标签（演出日 / 行程日 / 媒体日 / 休息日 / 落地日 / 离境日）。</p>
+  <h4>Section 2 · 票务设置</h4>
+  <p>多档票价，每档独立设置档位名称、容量占比、票价、目标上座率、目标售出量。<b>VIP Profit Split</b>（可选）：对任意票档启用 Price Lift，自动计算艺人 VIP 收入并在损益中单列。可变成本细项：出票费 / 手环 / PRS / 慈善 / 取消险。</p>
+  <h4>Section 3 · 演出成本</h4>
+  <p>13 个成本组、65 细项，来源于真实巡演内部 P&amp;L：场地费用、Backline / 制作、地面交通（按车型 + 多车）、酒店（按档次 / 合住）、机票、签证、文化报批许可、营销、票务运营、保险、VIP 服务成本、其他（版权费等）。每项显示历史参考区间（低 / 中位 / 高），可参考或手动覆盖；每行可标注权责归属（主办 / 艺人 / 分摊）。</p>
+  <h4>Section 4 · 损益结果</h4>
+  <p>核心 KPI 卡片（每场均值）：净票房、主办成本合计、净潜力、保底、艺人 VIP 收入、本场净收益、净收益占比、盈亏平衡上座率。所有计算结果带 ⓘ Tooltip，点击显示完整公式。</p>
+  <h4>Section 5 · 汇总方案</h4>
+  <p>① 我方 Offer 测算引擎（建议保底 = NPBO×30%，金额可编辑、联动评级；满场落袋 Walk-out 卡；利润保护垫 % 可编辑）；② 敏感性分析（60–100% 六档上座率）；③ 巡演 Tour Summary（含「主办收益 − 差旅 = 巡演净收益」对账行）；④ Offer 截止提醒（按报批 / 宣传天数倒推，颜色预警）。</p>
+
+  <h3>六、系统级功能</h3>
+  <div class="grid2">
+    <div class="card"><h4>Demo 模式</h4><p>内嵌 8 城 Livehouse 巡演真实数据，全字段只读，橙色横幅标注；入口为落地页「查看演示案例」。</p></div>
+    <div class="card"><h4>新手引导 Tour</h4><p>按 6 个 Section 逐区 11 步引导，聚光灯高亮 + 气泡说明，支持 ESC / 点背景退出。</p></div>
+    <div class="card"><h4>国际化 i18n</h4><p>中 / 英 / 西三语（国旗下拉，默认中文）；币种三段选择器 ¥ / $ / €，默认随语言、可点击覆盖。</p></div>
+    <div class="card"><h4>导出</h4><p>JSON 存档；整页 PDF（封面 + 目录 + 页码）；一键 Deal Memo（含潜在奖金 / 落袋 Walk-out 列与合计）。</p></div>
+  </div>
+
+  <h3>七、技术架构</h3>
+  <ul>
+    <li><b>文件形态：</b>单 HTML 文件，无外部依赖、无后端、浏览器直接打开。</li>
+    <li><b>数据存储：</b>本地 JSON 文件，不上传任何服务器。</li>
+    <li><b>状态管理：</b>纯 JS 对象（defaultState 工厂函数），无框架；单页滚动 + Intersection Observer 锚点高亮。</li>
+    <li><b>选择理由：</b>演出行业的真实场景是邮件附件、微信传文件、临时电脑演示——单文件最可靠，没有依赖失效风险。</li>
+  </ul>
+
+  <h3>八、有意不在 Phase 1 范围内</h3>
+  <p>场馆推荐引擎、Settlement 模块、对外 P&amp;L 生成（Buffer 模式）、多用户协作、Arena / Stadium 成本结构、票房区间预测——均为<b>有意排除</b>，详见产品路线图 Phase 2 / 3。</p>
+</section>
+
+</main>
+
+<footer class="wrap">
+  快速损益模拟系统 · Profit Calculator ｜ 产品经理作品集 · 刘雪莹 Blanca · 2026<br>
+  <span style="font-size:12px">本页为单文件 HTML 作品集，可直接用浏览器打开或托管到 GitHub Pages。</span>
+</footer>
+
+<script>
+  const btns=document.querySelectorAll('.tabs button'), secs=document.querySelectorAll('section.doc');
+  btns.forEach(b=>b.addEventListener('click',()=>{
+    btns.forEach(x=>x.classList.remove('active'));
+    secs.forEach(x=>x.classList.remove('active'));
+    b.classList.add('active');
+    document.getElementById(b.dataset.t).classList.add('active');
+    window.scrollTo({top:0,behavior:'smooth'});
+  }));
+</script>
+</body>
+</html>
