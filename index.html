@@ -295,6 +295,7 @@ input[type=number]{text-align:center}  /* [v3.8.45] 金额/数量等数字输入
   body.dm-printing > #dealmemo-print{display:block !important}
   body.pdf-printing > *{display:none !important}
   body.pdf-printing > #pdf-root{display:block !important;width:100% !important;max-width:none !important;padding:0 !important;border:0 !important;box-shadow:none !important}
+  body.pdf-printing #pdf-root, body.pdf-printing #pdf-root *{font-family:'PingFang SC','Hiragino Sans GB','Microsoft YaHei','Noto Sans CJK SC','WenQuanYi Micro Hei',-apple-system,sans-serif !important}
   body.pdf-printing, body.pdf-printing #pdf-root, body.pdf-printing #pdf-root *{-webkit-print-color-adjust:exact !important;print-color-adjust:exact !important}
   @page{margin:12mm 8mm}
 }
@@ -416,7 +417,7 @@ hr.divider{border:none;border-top:1px solid #eee;margin:16px 0}
 .dm-op .op-mini{display:flex;flex-wrap:wrap;gap:7px;margin:6px 0;font-size:11px;color:#555}
 .dm-op .op-mini span{background:#f4f5f9;border-radius:5px;padding:2px 7px}
 .dm-op .op-note{font-size:12.5px;color:#444;font-style:italic;background:#fafbff;border-radius:6px;padding:7px 10px;margin-top:4px}
-.dm-ref{font-size:12px;color:#555;line-height:1.7}
+.dm-ref{font-size:12px;color:#9aa0b4;line-height:1.7}
 .dm-ref a{color:#4f46e5;text-decoration:none}.dm-ref a:hover{text-decoration:underline}
 .dm-ref .dim-ref{margin-bottom:10px;padding-bottom:10px;border-bottom:1px solid #f0f1f6}
 .dm-ref b{color:#333}
@@ -879,12 +880,15 @@ Object.assign(TR_ES, {"在「项目信息 › 人员与餐标」修改":"Editar 
 Object.assign(TR, {"供应商库实测":"from supplier DB", "每场均价":"per-show avg", "分销":"Distribution", "票价":"Price", "项目":"Project", "手填":"manual", "右侧":"right side", "固定手续费":"flat fee", "固定费":"flat fee", "占票房":"% of gross", "净票房":"Net", "已选":"selected"});
 Object.assign(TR_ES, {"供应商库实测":"de la base de proveedores", "每场均价":"media por show", "分销":"Distribución", "票价":"Precio", "项目":"Proyecto", "手填":"manual", "右侧":"a la derecha", "固定手续费":"tarifa fija", "固定费":"tarifa fija", "占票房":"% del bruto", "净票房":"Neto", "已选":"seleccionado"});
 function translate(html){
-  if(lang!=='en' && lang!=='es') return html;   // [v3.8.49] 中文原样；英/西做整串替换
-  const map = lang==='es' ? TR_ES : TR;
-  const ck = lang==='es' ? '_keysEs' : '_keysEn';
-  if(!translate[ck]) translate[ck]=Object.keys(map).sort((a,b)=>b.length-a.length);
   let out=html;
-  for(const k of translate[ck]){ if(out.indexOf(k)>=0) out=out.split(k).join(map[k]); }
+  if(lang==='en' || lang==='es'){   // [v3.8.49] 中文原样；英/西做整串替换
+    const map = lang==='es' ? TR_ES : TR;
+    const ck = lang==='es' ? '_keysEs' : '_keysEn';
+    if(!translate[ck]) translate[ck]=Object.keys(map).sort((a,b)=>b.length-a.length);
+    for(const k of translate[ck]){ if(out.indexOf(k)>=0) out=out.split(k).join(map[k]); }
+  }
+  // [v3.8.106] 单位描述符币种符号随 displayCur(如 ¥/人→$/人)。「¥/」只出现于单位描述,金额(¥123)/汇率(¥7.28/USD)均不含「¥/」,不会误伤
+  if((state.displayCur||'CNY')!=='CNY') out=out.split('¥/').join(curSym()+'/');
   return out;
 }
 
@@ -1386,7 +1390,7 @@ function defaultState(){
     hotelTiers:{ artist:'mid', band:'mid', artistStaff:'mid', tourCrew:'mid' },
     hotelEarlyDays: 1,        // 首城提前入住天数
     hotelLateDays: 0,         // 末城延后退房天数
-    exchangeRate:7.28, eurRate:7.9, displayCur:'CNY', platformFeeRate:3, ticketPlatform:'custom', businessTaxRate:7, whtRate:5,
+    exchangeRate:7.28, eurRate:7.9, displayCur:'CNY', platformFeeRate:3, ticketPlatform:'custom', businessTaxRate:6, whtRate:5,
     guaranteeType:'per_show', guaranteeAmt:'', guaranteeCur:'CNY',
     targetROI:35,
     // #7/#8: 全局默认票价 & per diem 餐标（填一次→应用到所有场次，各城市仍可手动覆盖）
@@ -1409,6 +1413,7 @@ function defaultState(){
 // ── 日类型（完整行程）─────────────────────────────────────
 const DAY_TYPES=[
   {key:'show',    zh:'演出日', en:'Show',    icon:'🎤', color:'#2d3a8c'},
+  {key:'soundcheck', zh:'试音日', en:'Soundcheck', icon:'🎚️', color:'#14b8a6'},
   {key:'landing', zh:'落地日', en:'Landing', icon:'🛬', color:'#0ea5e9'},
   {key:'departure', zh:'离境日', en:'Departure', icon:'🛫', color:'#0891b2'},
   {key:'travel',  zh:'移动日', en:'Travel',  icon:'🚌', color:'#e6a23c'},
@@ -1444,6 +1449,7 @@ function logiTitle(ld){
   const m=dayTypeMeta(ld.type);
   if(ld.type==='landing') return '落地日：'+(ld.city||'（选城市）');
   if(ld.type==='departure') return '离境日：'+(ld.city||'（选城市）');
+  if(ld.type==='soundcheck') return '试音日：'+(ld.keyword||'自定义（可填写）');
   if(ld.type==='travel')  return '移动日：'+(ld.fromCity||'（起点）')+' → '+(ld.toCity||'（终点）');
   if(ld.type==='media')   return '媒体日：'+(ld.keyword||'自定义（可填写）');
   if(ld.type==='rest')    return '休息日：'+(ld.keyword||'自定义（可填写）');
@@ -1708,7 +1714,7 @@ function calcShow(show, overrideOcc){
   });
 
   const pfFee = showPlatformFee(show, gross);   // [#5/#7] 每场平台费：百分比叠加 + 固定费(秀动LH ¥10/场)
-  const bizTax = gross * ((state.businessTaxRate||0)/100);   // Business Tax（模板 7%；demo=0 守住基线）
+  const bizTax = vatOf(gross);                               // [v3.8.101] VAT除法：净=票面/(1+税率)
   const net = gross - pfFee - bizTax;
 
   // costs
@@ -1855,6 +1861,9 @@ function fmtY(n){return cm(n);}
 function langDefaultCur(l){ return l==='en'?'USD':l==='es'?'EUR':'CNY'; }
 function curSym(){ const d=state.displayCur||'CNY'; return d==='EUR'?'€':d==='USD'?'$':'¥'; }
 function curRate(){ const d=state.displayCur||'CNY'; return d==='EUR'?(+state.eurRate||7.9):d==='USD'?(+state.exchangeRate||7.28):1; }
+function vatOf(g){ const t=(state.businessTaxRate||0)/100; return t<=0?0:g*t/(1+t); }   // [v3.8.101] VAT按除法:含税票面提取税额 净=票面/(1+税率)
+function mIn(cny){ if(!cny) return ''; const r=curRate(); return r===1?cny:+(cny/r).toFixed(2); }   // [v3.8.102] 金额输入显示值(CNY→displayCur);CNY时no-op
+function mWr(v){ return (+v||0)*curRate(); }   // [v3.8.102] 金额输入回写CNY;CNY时=+v
 function cm(n){ if(n===null||n===undefined||isNaN(n)) return curSym()+'—'; const r=curRate()||1; const neg=n<0; const v=Math.round(Math.abs(n)/r); return (neg?'-':'')+curSym()+fmt(v); }
 function cur2sym(){ return curSym(); }
 function cur2rate(){ return curRate(); }
@@ -1918,7 +1927,6 @@ function readInputs(){
   state.platformFeeRate = n('f-pfrate', state.platformFeeRate);
   state.whtRate       = n('f-wht', state.whtRate);
   state.guaranteeAmt  = n('f-gamt', state.guaranteeAmt);
-  state.guaranteeCur  = v('f-gcur', state.guaranteeCur);
   state.paymentPlan   = v('f-pay-plan', state.paymentPlan);
   state.permitDays    = n('f-permit-days', state.permitDays);
   state.mktDays       = n('f-mkt-days', state.mktDays);
@@ -2106,13 +2114,7 @@ function renderS1(){
   </div>
 </div>
 <!-- [v3.8.51] Diamond 评估卡移到基本信息下方、人员与餐标之前 -->
-<div style="margin:0 0 16px;padding:20px;background:linear-gradient(120deg,#f8f9ff 0%,#eef2ff 100%);border:1.5px solid #d8dbe8;border-radius:10px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px">
-  <div style="flex:1;min-width:240px">
-    <div style="font-size:15px;font-weight:800;color:#4f46e5;margin-bottom:6px;display:flex;align-items:center;gap:6px">💎 艺人售票潜力评估 (Diamond Model)</div>
-    <div style="font-size:13px;color:#555;line-height:1.6">在确认最终 Offer 前，当前设定的预估上座率是否稳妥？<br>结合 <b>6 维 MECE 模型</b>（过往战绩、铁粉浓度、本地数据等），一键分发给团队进行无偏差打分，评估项目风险。</div>
-  </div>
-  <button class="btn btn-diamond" style="padding:10px 22px;font-size:13px;box-shadow:0 4px 14px rgba(79,70,229,0.25)" onclick="showForecast()">开始团队多维评估 ✨</button>
-</div>
+${dmEntryCardHTML()}
 <div class="card">
   <div class="card-title">人员与餐标<span class="tooltip-wrap"><span class="info-icon">ⓘ</span><span class="tip" style="white-space:normal;min-width:280px">四类人员的「人数」与「餐标(¥/人/场)」只在这里填。下面「演出成本 › 餐饮」四行金额 = 人数 × 餐标，自动驱动、成本项里只读。要改人数/餐标，回到这里改。</span></span></div>
   <div class="card-body">
@@ -2141,12 +2143,12 @@ function renderS1(){
   <div class="card-title" onclick="this.nextElementSibling.classList.toggle('collapsed');this.querySelector('.toggle-icon').textContent=this.nextElementSibling.classList.contains('collapsed')?'▸':'▾'">票价与票档 <span class="tooltip-wrap"><span class="info-icon">ⓘ</span><span class="tip" style="white-space:normal;min-width:240px">在此填一次，自动应用到所有场次；各城市仍可在「演出规划 / 演出成本」中手动覆盖。手动改过的城市不会被全局值覆盖。</span></span><span class="toggle-icon">▾</span></div>
   <div class="card-body">
     <div style="display:flex;flex-direction:column;gap:10px">
-      <div class="field"><label>快通票 Fast Pass</label><input type="number" id="f-gp-fast" value="${s.globalPrices.fast}" min="0" ${dis} placeholder="¥0.00" oninput="state.globalPrices.fast=this.value===''?'':+this.value;applyGlobalTicketPrices()"></div>
-      <div class="field"><label>全价票 GA</label><input type="number" id="f-gp-ga" value="${s.globalPrices.ga}" min="0" ${dis} placeholder="¥0.00" oninput="state.globalPrices.ga=this.value===''?'':+this.value;applyGlobalTicketPrices()"></div>
-      <div class="field"><label>VIP</label><input type="number" id="f-gp-vip" value="${s.globalPrices.vip}" min="0" ${dis} placeholder="¥0.00" oninput="state.globalPrices.vip=this.value===''?'':+this.value;applyGlobalTicketPrices()"></div>
+      <div class="field"><label>快通票 Fast Pass</label><input type="number" id="f-gp-fast" value="${s.globalPrices.fast}" min="0" ${dis} placeholder="${curSym()}0.00" oninput="state.globalPrices.fast=this.value===''?'':+this.value;applyGlobalTicketPrices()"></div>
+      <div class="field"><label>全价票 GA</label><input type="number" id="f-gp-ga" value="${s.globalPrices.ga}" min="0" ${dis} placeholder="${curSym()}0.00" oninput="state.globalPrices.ga=this.value===''?'':+this.value;applyGlobalTicketPrices()"></div>
+      <div class="field"><label>VIP</label><input type="number" id="f-gp-vip" value="${s.globalPrices.vip}" min="0" ${dis} placeholder="${curSym()}0.00" oninput="state.globalPrices.vip=this.value===''?'':+this.value;applyGlobalTicketPrices()"></div>
       ${(s.globalTiers||[]).map((gt,i)=>`<div class="field" style="display:flex;gap:8px;align-items:flex-end">
         <div style="flex:1.3"><label>${t('thName')}</label><input type="text" id="gt-name-${i}" value="${esc(gt.name||'')}" placeholder="${t('thName')}" style="text-align:left" oninput="onGlobalTierField(${i},'name',this.value)"></div>
-        <div style="flex:1"><label>${t('thPrice')}</label><input type="number" id="gt-price-${i}" value="${gt.price}" min="0" placeholder="¥0.00" oninput="onGlobalTierField(${i},'price',this.value===''?'':+this.value)"></div>
+        <div style="flex:1"><label>${t('thPrice')}</label><input type="number" id="gt-price-${i}" value="${mIn(gt.price)}" min="0" placeholder="${curSym()}0.00" oninput="onGlobalTierField(${i},'price',this.value===''?'':mWr(this.value))"></div>
         <button class="remove-btn" title="删除该票档 / Remove tier" style="margin-bottom:6px" onclick="removeGlobalTier(${i})">×</button>
       </div>`).join('')}
     </div>
@@ -2175,7 +2177,7 @@ function renderTourSummaryCard(){
   </div>
   <div class="text-muted">${state.shows.length}场演出 · 总容量 ${fmt(totCap)}人</div>
   ${tour.logi && tour.logi.days>0?`<div style="margin-top:8px;padding:8px 12px;background:#eef6ff;border-radius:6px;border:1px solid #b9d4ff;font-size:12px">
-    <span style="font-weight:700">🗓️ 行程日：${tour.logi.days}天</span> · 物流成本合计 ¥${fmt(tour.logi.cost)}
+    <span style="font-weight:700">🗓️ 行程日：${tour.logi.days}天</span> · 物流成本合计 ${cm(tour.logi.cost)}
     <span class="tooltip-wrap"><span class="info-icon">ⓘ</span><span class="tip" style="white-space:normal;min-width:240px">非演出日（落地/移动/媒体/休息）按你录入的酒店+per diem+交通显式计提：${tour.logi.details.map(d=>(d.date||'')+' '+dayTypeMeta(d.type).zh+' ¥'+fmt(d.total)).join('；')}</span></span>
   </div>`:''}
 </div>`;
@@ -2197,7 +2199,7 @@ ${renderShowCards()}`;
 function renderLogiCard(ld, i){
   const dis='';
   const meta=dayTypeMeta(ld.type);
-  const optOut=(ld.type==='departure'||ld.type==='media'||ld.type==='rest');
+  const optOut=(ld.type==='departure'||ld.type==='media'||ld.type==='rest'||ld.type==='soundcheck');
     const dow=ld.date?getWeekday(ld.date):'';
     const typeOpts=DAY_TYPES.filter(t=>t.key!=='show').map(t=>`<option value="${t.key}" ${ld.type===t.key?'selected':''}>${t.icon} ${t.zh}</option>`).join('');
     const h=ld.hotel||{rate:0,rooms:0,nights:1,amount:0};
@@ -2217,8 +2219,8 @@ function renderLogiCard(ld, i){
       <div style="flex:1;min-width:120px"><div class="cost-line-label">🍱 巡演工作团队 <span class="text-muted" style="font-size:11px">人数×餐标（默认取「人员与餐标」，可改）</span></div></div>
       <input type="number" id="logi-${i}-pdc" placeholder="0" value="${pdCount||''}" min="0" style="width:54px" oninput="onLogiPerDiem(${i},'count',this.value===''?'':+this.value)">
       <span style="color:#888;font-size:11px">人 ×</span>
-      <input type="number" id="logi-${i}-pdr" placeholder="¥0.00" value="${pdRate||''}" min="0" style="width:54px" oninput="onLogiPerDiem(${i},'rate',this.value===''?'':+this.value)">
-      <span style="color:#888;font-size:11px">= <span id="logi-pd-${i}">¥${fmt(logiPerDiemAmount(ld))}</span></span>
+      <input type="number" id="logi-${i}-pdr" placeholder="${curSym()}0.00" value="${mIn(pdRate)}" min="0" style="width:54px" oninput="onLogiPerDiem(${i},'rate',this.value===''?'':mWr(this.value))">
+      <span style="color:#888;font-size:11px">= <span id="logi-pd-${i}">${cm(logiPerDiemAmount(ld))}</span></span>
     </div>`;
   let groundLine;
   if(ld.type==='travel'){
@@ -2234,19 +2236,18 @@ function renderLogiCard(ld, i){
       </select>
       <input type="number" id="logi-${i}-mc" placeholder="0" value="${moveCount||''}" min="0" style="width:48px" oninput="onLogiField(${i},'moveCount',this.value===''?'':+this.value)">
       <span style="color:#888;font-size:11px">人</span>
-      <input type="number" id="logi-${i}-gr" placeholder="¥0.00" value="${logiGroundAmount(ld)||''}" min="0" step="100" style="width:92px" oninput="onLogiCost(${i},'ground','amount',+this.value)">
+      <input type="number" id="logi-${i}-gr" placeholder="${curSym()}0.00" value="${mIn(logiGroundAmount(ld))}" min="0" step="100" style="width:92px" oninput="onLogiCost(${i},'ground','amount',mWr(this.value))">
     </div>`;
-  }else if(ld.type==='landing'){
+  }else{
+    const _glab=ld.type==='landing'?'🚌 地面交通（接机）':ld.type==='departure'?'🚌 地面交通（送机）':'🚌 地面交通';
     const _vl=(ld.vehicles&&ld.vehicles.length)?ld.vehicles:[{type:'coaster',price:(ld.ground&&ld.ground.amount)||0}];
     const _vr=_vl.map((v,vi)=>`<div style="display:flex;gap:6px;align-items:center;margin:3px 0">
       <select onchange="onVehicleField(${i},${vi},'type',this.value)" style="font-size:12px;padding:3px 6px;border:1px solid #dde1ef;border-radius:6px">${VEHICLE_TYPES.map(t=>`<option value="${t.k}" ${v.type===t.k?'selected':''}>${t.label}</option>`).join('')}</select>
-      <input type="number" id="veh-${i}-${vi}-p" value="${v.price||''}" placeholder="¥0.00" min="0" step="50" style="width:84px" oninput="onVehicleField(${i},${vi},'price',+this.value)">
+      <input type="number" id="veh-${i}-${vi}-p" value="${mIn(v.price)}" placeholder="${curSym()}0.00" min="0" step="50" style="width:84px" oninput="onVehicleField(${i},${vi},'price',mWr(this.value))">
       ${_vl.length>1?`<button class="btn btn-xs btn-danger" onclick="onRemoveVehicle(${i},${vi})">×</button>`:''}
     </div>`).join('');
-    groundLine=`<div class="cost-line"><div style="flex:1;min-width:120px"><div class="cost-line-label">🚌 地面交通（接机）<span class="text-muted" style="font-size:11px">车型 · 可加多辆</span></div></div><div>${_vr}<button class="btn btn-ghost btn-sm" style="margin-top:4px" onclick="onAddVehicle(${i})">+ 加车</button> <span class="text-muted" style="font-size:11px">合计 ¥${fmt(logiGroundAmount(ld))}</span></div></div>`;
-  }else{
-    const glab=ld.type==='departure'?'🚌 地面交通（送机）':'🚌 地面交通';
-    groundLine=`<div class="cost-line" style="${optOut&&ld.groundOff?'opacity:.45':''}"><div style="flex:1;min-width:120px"><div class="cost-line-label">${glab}${optOut?` <label style="display:inline-flex;align-items:center;gap:4px;cursor:pointer;font-weight:400;font-size:11px;color:#666"><input type="checkbox" style="width:auto;margin:0" ${!ld.groundOff?'checked':''} onchange="onLogiHotelOpt(${i},'groundOff',!this.checked)"><span>计入</span></label>`:''}</div></div><input type="number" id="logi-${i}-gr" placeholder="¥0.00" value="${logiGroundAmount(ld)||''}" min="0" step="100" style="width:92px" oninput="onLogiCost(${i},'ground','amount',+this.value)"></div>`;
+    const _optChk=optOut?` <label style="display:inline-flex;align-items:center;gap:4px;cursor:pointer;font-weight:400;font-size:11px;color:#666"><input type="checkbox" style="width:auto;margin:0" ${!ld.groundOff?'checked':''} onchange="onLogiHotelOpt(${i},'groundOff',!this.checked)"><span>计入</span></label>`:'';
+    groundLine=`<div class="cost-line" style="${optOut&&ld.groundOff?'opacity:.45':''}"><div style="flex:1;min-width:120px"><div class="cost-line-label">${_glab}${_optChk} <span class="text-muted" style="font-size:11px">车型·可加多辆</span></div></div><div>${_vr}<button class="btn btn-ghost btn-sm" style="margin-top:4px" onclick="onAddVehicle(${i})">+ 加车</button> <span class="text-muted" style="font-size:11px">合计 ${cm(logiGroundAmount(ld))}</span></div></div>`;
   }
   let transferLine='';
   if(ld.type==='travel'){
@@ -2254,12 +2255,12 @@ function renderLogiCard(ld, i){
     const _tr=ld.transfer;
     transferLine=`<div class="cost-line" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
       <div style="flex:1;min-width:120px"><div class="cost-line-label">🛫🛬 接送机 <span class="text-muted" style="font-size:11px">送机(起点) + 接机(终点)，各可改</span></div></div>
-      <span style="color:#888;font-size:11px">送机</span><input type="number" id="logi-${i}-tro" placeholder="¥0.00" value="${_tr.dropoff||''}" min="0" step="50" style="width:76px" oninput="onTransfer(${i},'dropoff',+this.value)">
-      <span style="color:#888;font-size:11px">接机</span><input type="number" id="logi-${i}-trp" placeholder="¥0.00" value="${_tr.pickup||''}" min="0" step="50" style="width:76px" oninput="onTransfer(${i},'pickup',+this.value)">
-      <span style="color:#888;font-size:11px">= ¥${fmt((+_tr.dropoff||0)+(+_tr.pickup||0))}</span>
+      <span style="color:#888;font-size:11px">送机</span><input type="number" id="logi-${i}-tro" placeholder="${curSym()}0.00" value="${_tr.dropoff||''}" min="0" step="50" style="width:76px" oninput="onTransfer(${i},'dropoff',+this.value)">
+      <span style="color:#888;font-size:11px">接机</span><input type="number" id="logi-${i}-trp" placeholder="${curSym()}0.00" value="${_tr.pickup||''}" min="0" step="50" style="width:76px" oninput="onTransfer(${i},'pickup',+this.value)">
+      <span style="color:#888;font-size:11px">= ${cm((+_tr.dropoff||0)+(+_tr.pickup||0))}</span>
     </div>`;
   }
-  return `<div class="show-card" id="logi-card-${i}" style="border-left:4px solid ${meta.color}">
+  return `<div class="show-card" id="logi-card-${i}" style="border-left:5px solid ${meta.color};background:#fff">
   <div class="show-card-header" style="cursor:default">
     <div class="show-date-badge" style="background:${meta.color}">${ld.date||'—'}${dow}</div>
     <div class="show-card-title">${meta.icon} ${esc(logiTitle(ld))}</div>
@@ -2277,18 +2278,18 @@ function renderLogiCard(ld, i){
         ${optOut?`<label style="display:inline-flex;align-items:center;gap:4px;cursor:pointer;margin-left:6px;color:#666"><input type="checkbox" style="width:auto;margin:0" ${!ld.hotelOff?'checked':''} onchange="onLogiHotelOpt(${i},'hotelOff',!this.checked)"><span>计入</span></label>`:''}
       </div>
       <div class="cl-inputs">
-        <input type="number" id="logi-${i}-hrate" placeholder="¥0.00" value="${h.rate||''}" min="0" style="width:82px" ${dis} oninput="onLogiCost(${i},'hotel','rate',+this.value)">
+        <input type="number" id="logi-${i}-hrate" placeholder="${curSym()}0.00" value="${mIn(h.rate)}" min="0" style="width:82px" ${dis} oninput="onLogiCost(${i},'hotel','rate',mWr(this.value))">
         <span style="color:#888;font-size:11px">×</span>
         <input type="number" id="logi-${i}-hrooms" placeholder="0" value="${h.rooms||''}" min="0" style="width:56px" ${dis} oninput="onLogiCost(${i},'hotel','rooms',+this.value)">
         <span style="color:#888;font-size:11px">间 ×</span>
         <input type="number" id="logi-${i}-hnights" placeholder="0" value="${h.nights||''}" min="0" style="width:56px" ${dis} oninput="onLogiCost(${i},'hotel','nights',+this.value)">
-        <span style="color:#888;font-size:11px">晚 = <span id="logi-hamt-${i}">¥${fmt(h.amount||0)}</span></span>
+        <span style="color:#888;font-size:11px">晚 = <span id="logi-hamt-${i}">${cm(h.amount||0)}</span></span>
       </div>
     </div>
     ${pdLine}
     ${groundLine}
     ${transferLine}
-    <div class="notice notice-blue" style="margin-top:8px">本日成本合计：<b id="logi-total-${i}">¥${fmt(logiDayTotal(ld))}</b>（计入巡演主办成本）</div>
+    <div class="notice notice-blue" style="margin-top:8px">本日成本合计：<b id="logi-total-${i}">${cm(logiDayTotal(ld))}</b>（计入巡演主办成本）</div>
   </div>
 </div>`;
 }
@@ -2297,7 +2298,7 @@ function renderLogiCards(){
   if(!days.length) return '';
   const cards=days.map((ld,i)=>renderLogiCard(ld,i)).join('');
   const total=days.reduce((a,ld)=>a+logiDayTotal(ld),0);
-  return `<div style="margin-top:6px;font-size:13px;font-weight:700;color:#2d3a8c">行程日（非演出日）· 合计 ¥${fmt(total)}</div>${cards}`;
+  return `<div style="margin-top:6px;font-size:13px;font-weight:700;color:#2d3a8c">行程日（非演出日）· 合计 ${cm(total)}</div>${cards}`;
 }
 // [v3.7.48] 演出卡 + 行程日卡 按日期合并排序渲染（用各自原始索引保 id/事件）
 function renderDayCards(){
@@ -2513,11 +2514,11 @@ function renderTierTable(sh, showIdx){
       <select style="width:100%;font-size:11px;border:1px solid #dde1ef;border-radius:4px;padding:3px" id="sh-${showIdx}-t${ti}-base" ${dis} onchange="onTierField(${showIdx},${ti},'baseTierIdx',+this.value)">
         ${(sh.tiers||[]).map((t2,bi)=>bi!==ti?`<option value="${bi}" ${tier.baseTierIdx===bi?'selected':''}>${esc(t2.name)}</option>`:'').filter(Boolean).join('')}
       </select>
-      <input type="number" id="tlift-${showIdx}-${ti}" value="${tier.priceLift||0}" placeholder="Lift" style="width:60px;padding:4px 6px;font-size:12px;border:1px solid #dde1ef;border-radius:4px" ${dis} oninput="onTierField(${showIdx},${ti},'priceLift',+this.value)">
+      <input type="number" id="tlift-${showIdx}-${ti}" value="${tier.priceLift?mIn(tier.priceLift):0}" placeholder="Lift" style="width:60px;padding:4px 6px;font-size:12px;border:1px solid #dde1ef;border-radius:4px" ${dis} oninput="onTierField(${showIdx},${ti},'priceLift',mWr(this.value))">
     `:`<span class="text-muted">—</span><span></span>`;
     return `<tr>
       <td><input type="text" id="tname-${showIdx}-${ti}" value="${esc(tier.name)}" oninput="onTierField(${showIdx},${ti},'name',this.value)" ${dis}></td>
-      <td><input type="number" id="tprice-${showIdx}-${ti}" placeholder="¥0.00" value="${tier.price}" min="0" oninput="onTierField(${showIdx},${ti},'price',this.value===''?'':+this.value)" ${dis}></td>
+      <td><input type="number" id="tprice-${showIdx}-${ti}" placeholder="${curSym()}0.00" value="${mIn(tier.price)}" min="0" oninput="onTierField(${showIdx},${ti},'price',this.value===''?'':mWr(this.value))" ${dis}></td>
       <td>${countCell}</td>
       ${khcCells}
       <td style="display:flex;gap:4px;align-items:center;flex-wrap:wrap">
@@ -2562,7 +2563,7 @@ function renderTierTable(sh, showIdx){
   }
   return `${ticketingRow}<table class="tier-table">${headers}<tbody>${rows}</tbody></table>
 <div id="tierwarn-${showIdx}">${tierWarnHTML(totalCount,cap)}</div>
-${(()=>{const _r=calcShow(sh)||{};const _atp=_r.soldTotal>0?Math.round(_r.gross/_r.soldTotal):0;return _atp>0?`<div style="margin-top:6px;font-size:12px;color:#555">📊 加权平均票价 <b>¥${fmt(_atp)}</b>（总票房 ¥${fmt(Math.round(_r.gross))} ÷ 目标售出 ${fmt(_r.soldTotal)} 张）</div>`:'';})()}
+${(()=>{const _r=calcShow(sh)||{};const _atp=_r.soldTotal>0?Math.round(_r.gross/_r.soldTotal):0;return _atp>0?`<div style="margin-top:6px;font-size:12px;color:#555">📊 加权平均票价 <b>${cm(_atp)}</b>（总票房 ${cm(Math.round(_r.gross))} ÷ 目标售出 ${fmt(_r.soldTotal)} 张）</div>`:'';})()}
 <button class="btn btn-ghost btn-xs mt12" onclick="addTier(${showIdx})">${t('addTier')}</button>`;
 }
 
@@ -2592,12 +2593,12 @@ function renderS3(){
   if(s.shows.length && s.shows.some(sh=>sh._guarantee!==undefined)){
     const rows=s.shows.map(sh=>{
       const g=sh._guarantee||0;
-      return `<tr><td>${esc(sh.city||'—')}</td><td>${esc(sh.venue||'—')}</td><td style="text-align:right">$${fmt(g)}</td><td style="text-align:right">¥${fmt(g*s.exchangeRate)}</td></tr>`;
+      return `<tr><td>${esc(sh.city||'—')}</td><td>${esc(sh.venue||'—')}</td><td style="text-align:right" colspan="2">${cm(g)}</td></tr>`;
     }).join('');
     const tot=s.shows.reduce((a,sh)=>a+(sh._guarantee||0),0);
     perShowTable=`<div style="margin-top:14px"><div class="text-muted" style="margin-bottom:6px">各城市保底明细</div>
     <table class="tour-table"><thead><tr><th>城市</th><th>场馆</th><th style="text-align:right">USD</th><th style="text-align:right">CNY</th></tr></thead>
-    <tbody>${rows}</tbody><tfoot><tr><td colspan="2">合计</td><td style="text-align:right">$${fmt(tot)}</td><td style="text-align:right">¥${fmt(tot*s.exchangeRate)}</td></tr></tfoot></table></div>`;
+    <tbody>${rows}</tbody><tfoot><tr><td colspan="2">合计</td><td style="text-align:right" colspan="2">${cm(tot)}</td></tr></tfoot></table></div>`;
   }
   return `<div class="section-header"><div class="section-num">5</div><div class="section-title">${t('s3')}</div></div>
 <div class="card">
@@ -2619,17 +2620,22 @@ function renderS3(){
 </div>`;
 }
 
-// [v3.7.56] 每场艺人费用层（结构/保底/货币/预扣税，各场独立）
+// [v3.8.96] 保底统一以 CNY 内部存储；货币显示由菜单栏 displayCur 控制。导入/demo 时把非 CNY 保底换算成 CNY（不四舍五入，守 golden master）。
+function migrateGuaToCNY(st){
+  const r=st.exchangeRate||7.28, eu=st.eurRate||7.9;
+  (st.shows||[]).forEach(sh=>{ const c=sh.guaranteeCur||st.guaranteeCur||'CNY'; if(sh._guarantee!=null && c!=='CNY'){ sh._guarantee=sh._guarantee*(c==='EUR'?eu:r); } sh.guaranteeCur='CNY'; });
+  st.guaranteeCur='CNY';
+}
+function onGuaInput(idx,v){ const sh=state.shows[idx]; if(!sh) return; sh._guarantee=(v===''?undefined:Math.round(+v*curRate())); sh.guaranteeCur='CNY'; render(); }
+// [v3.7.56] 每场艺人费用层（结构/保底/预扣税，各场独立；货币随菜单栏）
 function renderArtistFee(sh, idx){
   const gtypeOpts=[['guarantee',t('gTypeGuarantee')],['guarantee_backend',t('gTypeGuaBackend')],['door_deal',t('gTypeDoorDeal')],['flat_fee',t('gTypeFlatFee')]].map(o=>`<option value="${o[0]}" ${(sh.guaranteeType||state.guaranteeType)===o[0]?'selected':''}>${o[1]}</option>`).join('');
-  const cur=sh.guaranteeCur||state.guaranteeCur;
-  const gcurOpts=['CNY','USD'].map(v=>`<option value="${v}" ${cur===v?'selected':''}>${v}</option>`).join('');
   const wht=sh.whtRate!==undefined?sh.whtRate:state.whtRate;
+  const _gDisp=sh._guarantee!==undefined?(state.displayCur==='CNY'?sh._guarantee:+(sh._guarantee/curRate()).toFixed(2)):'';
   return `<div style="font-size:17px;font-weight:800;color:#2d3a8c;margin:24px 0 12px">🎤 艺人费用<span class="text-muted" style="font-size:12px;font-weight:400"> · 本场单独编辑</span></div>
-<div class="form-grid g3">
+<div class="form-grid">
   <div class="field"><label>${t('gType')}</label><select id="f-gtype-${idx}" onchange="state.shows[${idx}].guaranteeType=this.value;render()">${gtypeOpts}</select></div>
-  <div class="field"><label>${t('gAmt')}</label><input type="number" id="f-gua-${idx}" value="${sh._guarantee!==undefined?sh._guarantee:''}" min="0" placeholder="0" oninput="state.shows[${idx}]._guarantee=(this.value===''?undefined:+this.value);render()"></div>
-  <div class="field"><label>${t('gCur')}</label><select id="f-gcur-${idx}" onchange="state.shows[${idx}].guaranteeCur=this.value;render()">${gcurOpts}</select></div>
+  <div class="field"><label>${t('gAmt')}（${curSym()}）</label><input type="number" id="f-gua-${idx}" value="${_gDisp}" min="0" placeholder="0" oninput="onGuaInput(${idx},this.value)"></div>
 </div>
 <div class="form-grid">
   <div class="field" style="max-width:260px"><label>${t('wht')}</label><input type="number" id="f-wht-${idx}" value="${wht}" min="0" max="50" oninput="state.shows[${idx}].whtRate=+this.value;render()"><div class="hint">从艺人款代扣，不计入演出成本（仅作 Offer 条款）</div></div>
@@ -2753,7 +2759,7 @@ function renderCostGroup(group, sh, r, showIdx){
   <div class="cost-group-header" onclick="toggleCostGroup('${group.key}')">
     <span class="cost-group-title">${gLabel}</span>
     <div style="display:flex;align-items:center;gap:10px">
-      <span class="cost-group-sub" id="cgsub-${group.key}">¥${fmt(groupTotal)}</span>
+      <span class="cost-group-sub" id="cgsub-${group.key}">${cm(groupTotal)}</span>
       <button class="copy-btn" onclick="event.stopPropagation();copyGroupToAll('${group.key}')">${t('copyAll')}</button>
       <span>${collapsed?'▸':'▾'}</span>
     </div>
@@ -2794,7 +2800,7 @@ function renderCostLine(item, sh, showIdx, dis){
       : '(餐标×人数 · 随人员表)';
     return `<div class="cost-line">
   <div style="flex:1;min-width:120px"><div class="cost-line-label">${esc(lbl)} <span class="text-muted">${subhint}</span></div></div>
-  <input type="number" value="${u||''}" placeholder="¥0.00" ${ro}>
+  <input type="number" value="${u||''}" placeholder="${curSym()}0.00" ${ro}>
   <input type="number" value="${q||''}" placeholder="0" ${ro}>
   <input type="number" value="${a||''}" placeholder="0" ${ro}>
   
@@ -2811,7 +2817,7 @@ function renderCostLine(item, sh, showIdx, dis){
     const nShows=(state.shows||[]).length||1;
     const showAmort=!!AMORTIZE_TOUR_KEYS[item.key] && fullAmt>0;
     const amortNote=showAmort
-      ? `<div class="cost-line-ref">一次性：全程 ¥${fmt(fullAmt)} ÷ ${nShows} 场 = ¥${fmt(Math.round(fullAmt/nShows))}/场（计入本场）</div>`
+      ? `<div class="cost-line-ref">一次性：全程 ${cm(fullAmt)} ÷ ${nShows} 场 = ${cm(Math.round(fullAmt/nShows))}/场（计入本场）</div>`
       : '';
     const headExtra=showAmort?' ÷ 场数':'';
     // [v3.8.18] 安保费率默认提示：场馆无 sf → 默认 ¥300/人，打 * 提醒用户核实
@@ -2820,13 +2826,13 @@ function renderCostLine(item, sh, showIdx, dis){
     const defRef = _rateDefaulted ? `<div class="cost-line-ref" style="color:#d08700">* 数据库未登记该场馆安保费率，默认 ¥300/人（请核实）</div>` : '';
     const amtRO=showAmort?'disabled style="background:#f3f4f8;color:#777;cursor:not-allowed"':dis;
     const amtTitle=showAmort
-      ? `全程 ${fmt(c.unitPrice||0)}/人 × ${fmt(c.quantity||0)} = ¥${fmt(fullAmt)} ÷ ${nShows}场 = ¥${fmt(Math.round(fullAmt/nShows))}/场（一次性成本自动摊销·只读，改单价/人数即可）`
+      ? `全程 ${fmt(c.unitPrice||0)}/人 × ${fmt(c.quantity||0)} = ${cm(fullAmt)} ÷ ${nShows}场 = ${cm(Math.round(fullAmt/nShows))}/场（一次性成本自动摊销·只读，改单价/人数即可）`
       : `${fmt(c.unitPrice||0)}/人 × ${fmt(c.quantity||0)} = ${fmt(fullAmt)}`;
     return `<div class="cost-line">
   <div style="flex:1;min-width:120px"><div class="cost-line-label">${esc(lbl)}${defStar} <span class="text-muted">(¥/人 × ${headLabel}${headExtra})</span></div>${splitHint}${amortNote}${defRef}</div>
-  <input type="number" id="unit-${showIdx}-${item.key}" placeholder="¥0.00" value="${up}" min="0" step="10" ${dis} oninput="onCostUnit(${showIdx},'${item.key}',+this.value)">
+  <input type="number" id="unit-${showIdx}-${item.key}" placeholder="${curSym()}0.00" value="${mIn(up)}" min="0" step="10" ${dis} oninput="onCostUnit(${showIdx},'${item.key}',mWr(this.value))">
   <input type="number" id="qty-${showIdx}-${item.key}" placeholder="${headLabel}" value="${qty}" min="0" step="1" ${dis} oninput="onCostQty(${showIdx},'${item.key}',+this.value)">
-  <input type="number" id="amt-${showIdx}-${item.key}" value="${c.amount||''}" placeholder="0" min="0" step="100" ${amtRO} title="${amtTitle}" oninput="onCost(${showIdx},'${item.key}',+this.value)">
+  <input type="number" id="amt-${showIdx}-${item.key}" value="${mIn(c.amount)}" placeholder="0" min="0" step="100" ${amtRO} title="${amtTitle}" oninput="onCost(${showIdx},'${item.key}',mWr(this.value))">
 
 </div>`;
   }
@@ -2848,11 +2854,11 @@ function renderCostLine(item, sh, showIdx, dis){
         const commission=merch.mode==='promoter_full'?rev*0.2:rev-(mi.prodCost||0)*(mi.estSales||0);
         return `<div style="display:flex;gap:4px;align-items:center;flex-wrap:wrap;margin-bottom:4px;padding:4px 0;border-bottom:1px dotted #eee">
           <input type="text" id="mi-${showIdx}-${ri}-cat" placeholder="种类" value="${esc(mi.category||'')}" style="width:72px;font-size:12px;padding:4px 6px;border:1px solid #dde1ef;border-radius:4px" oninput="onMerchItem(${showIdx},${ri},'category',this.value)">
-          <input type="number" id="mi-${showIdx}-${ri}-unit" placeholder="¥0.00" value="${mi.unitPrice||''}" min="0" style="width:60px;font-size:12px;padding:4px 6px;border:1px solid #dde1ef;border-radius:4px" oninput="onMerchItem(${showIdx},${ri},'unitPrice',+this.value)">
-          ${merch.mode==='promoter_prod'?`<input type="number" id="mi-${showIdx}-${ri}-prod" placeholder="¥0.00" value="${mi.prodCost||''}" min="0" style="width:60px;font-size:12px;padding:4px 6px;border:1px solid #dde1ef;border-radius:4px" oninput="onMerchItem(${showIdx},${ri},'prodCost',+this.value)">`:''}
+          <input type="number" id="mi-${showIdx}-${ri}-unit" placeholder="${curSym()}0.00" value="${mIn(mi.unitPrice)}" min="0" style="width:60px;font-size:12px;padding:4px 6px;border:1px solid #dde1ef;border-radius:4px" oninput="onMerchItem(${showIdx},${ri},'unitPrice',mWr(this.value))">
+          ${merch.mode==='promoter_prod'?`<input type="number" id="mi-${showIdx}-${ri}-prod" placeholder="${curSym()}0.00" value="${mIn(mi.prodCost)}" min="0" style="width:60px;font-size:12px;padding:4px 6px;border:1px solid #dde1ef;border-radius:4px" oninput="onMerchItem(${showIdx},${ri},'prodCost',mWr(this.value))">`:''}
           <input type="number" id="mi-${showIdx}-${ri}-sales" placeholder="0" value="${mi.estSales||''}" min="0" style="width:64px;font-size:12px;padding:4px 6px;border:1px solid #dde1ef;border-radius:4px" oninput="onMerchItem(${showIdx},${ri},'estSales',+this.value)">
-          <span style="font-size:11px;color:#888">收入:¥${fmt(rev)}</span>
-          <span style="font-size:11px;color:#38a169;font-weight:600">提成:¥${fmt(Math.max(0,commission))}</span>
+          <span style="font-size:11px;color:#888">收入:${cm(rev)}</span>
+          <span style="font-size:11px;color:#38a169;font-weight:600">提成:${cm(Math.max(0,commission))}</span>
           ${(merch.items||[]).length>1?`<button class="remove-btn" style="font-size:11px" onclick="removeMerchItem(${showIdx},${ri})">×</button>`:''}
         </div>`;
       }).join('');
@@ -2864,7 +2870,7 @@ function renderCostLine(item, sh, showIdx, dis){
         <div style="font-size:11px;font-weight:700;color:#666;margin-bottom:6px">周边商品明细</div>
         ${miRows}
         <button class="btn btn-ghost btn-xs" style="margin-top:4px" onclick="addMerchItem(${showIdx})">+ 添加商品</button>
-        <div style="margin-top:6px;font-size:12px;font-weight:700;color:#2d3a8c">主办方提成合计：¥${fmt(totalCommission)}</div>
+        <div style="margin-top:6px;font-size:12px;font-weight:700;color:#2d3a8c">主办方提成合计：${cm(totalCommission)}</div>
       </div>`;
     }
     return `<div class="cost-line" style="display:flex;flex-wrap:wrap;flex-direction:column;align-items:stretch">
@@ -2884,17 +2890,17 @@ function renderCostLine(item, sh, showIdx, dis){
     const visaRowsHtml=rows.map((vr,ri)=>`<div style="display:flex;gap:4px;align-items:center;flex-wrap:wrap;margin-bottom:4px">
       <input type="text" id="visa-${showIdx}-${ri}-nat" placeholder="国籍" value="${esc(vr.nationality||'')}" style="width:64px;font-size:12px;padding:4px 6px;border:1px solid #dde1ef;border-radius:4px" ${dis} oninput="onVisaRow(${showIdx},${ri},'nationality',this.value)">
       <input type="text" id="visa-${showIdx}-${ri}-type" placeholder="签证类型" value="${esc(vr.visaType||'')}" style="width:72px;font-size:12px;padding:4px 6px;border:1px solid #dde1ef;border-radius:4px" ${dis} oninput="onVisaRow(${showIdx},${ri},'visaType',this.value)">
-      <input type="number" id="visa-${showIdx}-${ri}-unit" placeholder="¥0.00" value="${vr.unitPrice||''}" min="0" style="width:64px;font-size:12px;padding:4px 6px;border:1px solid #dde1ef;border-radius:4px" ${dis} oninput="onVisaRow(${showIdx},${ri},'unitPrice',+this.value)">
+      <input type="number" id="visa-${showIdx}-${ri}-unit" placeholder="${curSym()}0.00" value="${mIn(vr.unitPrice)}" min="0" style="width:64px;font-size:12px;padding:4px 6px;border:1px solid #dde1ef;border-radius:4px" ${dis} oninput="onVisaRow(${showIdx},${ri},'unitPrice',mWr(this.value))">
       <span style="color:#888;font-size:11px">×</span>
       <input type="number" id="visa-${showIdx}-${ri}-persons" placeholder="0" value="${vr.persons||''}" min="0" style="width:48px;font-size:12px;padding:4px 6px;border:1px solid #dde1ef;border-radius:4px" ${dis} oninput="onVisaRow(${showIdx},${ri},'persons',+this.value)">
       <span style="color:#888;font-size:11px">=</span>
-      <span style="font-size:12px;font-weight:600;min-width:52px;text-align:right">¥${fmt((vr.unitPrice||0)*(vr.persons||0))}</span>
+      <span style="font-size:12px;font-weight:600;min-width:52px;text-align:right">${cm((vr.unitPrice||0)*(vr.persons||0))}</span>
       ${rows.length>1?`<button class="remove-btn" style="font-size:11px" onclick="removeVisaRow(${showIdx},${ri})">×</button>`:''}
     </div>`).join('');
     const totalVisa=rows.reduce((a,vr)=>a+(vr.unitPrice||0)*(vr.persons||0),0);
     return `<div class="cost-line wide">
   <div class="cl-top">
-    <div><span class="cost-line-label">${esc(lbl)}</span> <span style="font-size:11px;color:#888;font-weight:600">合计：¥${fmt(totalVisa)}</span>${splitHint}</div>
+    <div><span class="cost-line-label">${esc(lbl)}</span> <span style="font-size:11px;color:#888;font-weight:600">合计：${cm(totalVisa)}</span>${splitHint}</div>
     
   </div>
   <div style="margin-top:8px">
@@ -2909,13 +2915,13 @@ function renderCostLine(item, sh, showIdx, dis){
   if(isHotel){
     const rate=c.hotelRate||0, rooms=c.hotelPersons||0, nights=c.hotelNights||0;
     const calcAmt=rate*rooms*nights;
-    const formulaStr=`${fmt(rate)}/间晚 × ${rooms}间 × ${nights}晚 = ¥${fmt(calcAmt)}`;
+    const formulaStr=`${cm(rate)}/间晚 × ${rooms}间 × ${nights}晚 = ${cm(calcAmt)}`;
     // First city gets early check-in option (+1 night)
     return `<div class="cost-line">
   <div style="flex:1;min-width:120px"><div class="cost-line-label">${esc(lbl)}</div>${splitHint}</div>
-  <input type="number" id="hrate-${showIdx}-${item.key}" placeholder="¥0.00" value="${rate||''}" min="0" ${dis} title="房价 ¥/间晚（默认住 1 晚）" oninput="onCostHotel(${showIdx},'${item.key}','hotelRate',+this.value)">
+  <input type="number" id="hrate-${showIdx}-${item.key}" placeholder="${curSym()}0.00" value="${mIn(rate)}" min="0" ${dis} title="房价 ¥/间晚（默认住 1 晚）" oninput="onCostHotel(${showIdx},'${item.key}','hotelRate',mWr(this.value))">
   <input type="number" id="hrooms-${showIdx}-${item.key}" placeholder="0" value="${rooms||''}" min="0" ${dis} oninput="onCostHotel(${showIdx},'${item.key}','hotelPersons',+this.value)">
-  <input type="number" id="amt-${showIdx}-${item.key}" value="${c.amount||''}" placeholder="0" min="0" step="100" ${dis} title="${formulaStr}" oninput="onCost(${showIdx},'${item.key}',+this.value)">
+  <input type="number" id="amt-${showIdx}-${item.key}" value="${mIn(c.amount)}" placeholder="0" min="0" step="100" ${dis} title="${formulaStr}" oninput="onCost(${showIdx},'${item.key}',mWr(this.value))">
 </div>`;
   }
 
@@ -2934,17 +2940,17 @@ function renderCostLine(item, sh, showIdx, dis){
           <option value="daily" ${tr.service==='daily'?'selected':''}>全天日租</option>
         </select>
         <input type="number" id="gt-${showIdx}-${item.key}-${ri}-qty" min="1" value="${tr.qty||1}" style="width:50px;font-size:12px;padding:5px;border:1px solid #dde1ef;border-radius:6px;text-align:right" oninput="onTransRow(${showIdx},${ri},'qty',+this.value,'${item.key}')" title="数量">
-        <span style="font-size:11px;color:#888;min-width:64px;text-align:right">¥${fmt(sub)}</span>
+        <span style="font-size:11px;color:#888;min-width:64px;text-align:right">${cm(sub)}</span>
         ${rows.length>1?`<button class="remove-btn" onclick="removeTransRow(${showIdx},${ri},'${item.key}')">×</button>`:''}
       </div>`;
     }).join('');
     const total=rows.reduce((a,tr)=>a+CITY_REF.transport[tr.type][tr.service]*(tr.qty||1),0);
     const body = rows.length
       ? `${trRowsHtml}<button class="btn btn-ghost btn-xs" style="margin-top:2px" onclick="addTransRow(${showIdx},'${item.key}')">+ 添加车型</button>`
-      : `<div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap"><input type="number" placeholder="¥0.00" value="${c.amount||''}" placeholder="0" min="0" step="100" style="width:92px" oninput="onCost(${showIdx},'${item.key}',+this.value)"><button class="btn btn-ghost btn-xs" onclick="addTransRow(${showIdx},'${item.key}')">+ 按车型/服务录入</button></div>`;
+      : `<div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap"><input type="number" placeholder="${curSym()}0.00" value="${mIn(c.amount)}" placeholder="0" min="0" step="100" style="width:92px" oninput="onCost(${showIdx},'${item.key}',mWr(this.value))"><button class="btn btn-ghost btn-xs" onclick="addTransRow(${showIdx},'${item.key}')">+ 按车型/服务录入</button></div>`;
     return `<div class="cost-line wide">
   <div class="cl-top">
-    <div><span class="cost-line-label">${esc(lbl)}</span> ${rows.length?`<span style="font-size:11px;color:#888;font-weight:600">合计：¥${fmt(total)}</span>`:''}${splitHint}</div>
+    <div><span class="cost-line-label">${esc(lbl)}</span> ${rows.length?`<span style="font-size:11px;color:#888;font-weight:600">合计：${cm(total)}</span>`:''}${splitHint}</div>
     
   </div>
   <div style="margin-top:8px">${body}</div>
@@ -2962,7 +2968,7 @@ function renderCostLine(item, sh, showIdx, dis){
   </div>
   <div></div>
   <div style="text-align:center;color:#999;font-size:11px;align-self:center">每场</div>
-  <input type="number" id="amt-${showIdx}-backline" value="${c.amount||''}" placeholder="0" min="0" step="500" ${dis} title="每场 Backline 制作费" oninput="onCost(${showIdx},'backline',+this.value)">
+  <input type="number" id="amt-${showIdx}-backline" value="${mIn(c.amount)}" placeholder="0" min="0" step="500" ${dis} title="每场 Backline 制作费" oninput="onCost(${showIdx},'backline',mWr(this.value))">
 </div>`;
   }
   // [v3.7.40] 占票房% 成本项。[v3.8.30] infoOnly=票务平台费：改为「逐平台口径说明 + 本场实际费用」单格展示，不再借用单价×数量列（避免 3×296000≠8880 的视觉错位）。
@@ -2975,15 +2981,15 @@ function renderCostLine(item, sh, showIdx, dis){
       const parts=ps.map(p=>{
         const tp=TICKET_PLATFORMS.find(x=>x.k===p.k);
         const nm=(tp?tp.label:'自定义').replace(/（.*?）/,'').trim();
-        if(tp&&tp.mode==='flat'){const fl=(p.flat!=null?p.flat:(tp.flat||0));return `${nm}：固定 ¥${fmt(fl)}/场`;}
-        return `${nm}：${(+p.rate||0)}% × 票房 ¥${fmt(Math.round(gross))} = ¥${fmt(Math.round(gross*(+p.rate||0)/100))}`;
+        if(tp&&tp.mode==='flat'){const fl=(p.flat!=null?p.flat:(tp.flat||0));return `${nm}：固定 ${cm(fl)}/场`;}
+        return `${nm}：${(+p.rate||0)}% × 票房 ${cm(Math.round(gross))} = ${cm(Math.round(gross*(+p.rate||0)/100))}`;
       });
       const breakdown=parts.join('<br>');
       return `<div class="cost-line" style="align-items:flex-start">
   <div style="flex:1;min-width:120px"><div class="cost-line-label">${esc(lbl)} <span class="text-muted">（本场实际·已在净票房扣除·仅展示）</span></div><div class="cost-line-ref" style="margin-top:3px;line-height:1.5">${breakdown}</div></div>
   <input type="text" value="—" disabled style="background:#f3f4f8;color:#bbb;text-align:center" title="平台费按费率/固定费计，无「单价×数量」">
   <input type="text" value="—" disabled style="background:#f3f4f8;color:#bbb;text-align:center" title="平台费按费率/固定费计，无「单价×数量」">
-  <input type="number" value="${fee||''}" placeholder="0" disabled style="background:#f3f4f8;color:#777" title="本场实际票务平台费合计 = ¥${fmt(fee)}">
+  <input type="number" value="${fee||''}" placeholder="0" disabled style="background:#f3f4f8;color:#777" title="本场实际票务平台费合计 = ${cm(fee)}">
 </div>`;
     }
     const rate=(c.amount||0);
@@ -2992,7 +2998,7 @@ function renderCostLine(item, sh, showIdx, dis){
     return `<div class="cost-line">
   <div style="flex:1;min-width:120px"><div class="cost-line-label">${esc(lbl)} ${note}</div>${splitHint}</div>
   <input type="number" id="rate-${showIdx}-${item.key}" placeholder="费率%" value="${rate||''}" min="0" step="0.1" ${dis} title="占总票房的百分比 %" oninput="onCost(${showIdx},'${item.key}',+this.value)">
-  <input type="number" value="${gross?Math.round(gross):''}" placeholder="¥0.00" disabled style="background:#f3f4f8;color:#777" title="总票房（自动）">
+  <input type="number" value="${gross?Math.round(gross):''}" placeholder="${curSym()}0.00" disabled style="background:#f3f4f8;color:#777" title="总票房（自动）">
   <input type="number" value="${fee||''}" placeholder="0" disabled style="background:#f3f4f8;color:#777" title="${fmt(gross)} × ${rate}% = ${fmt(fee)}">
 </div>`;
   }
@@ -3007,10 +3013,10 @@ function renderCostLine(item, sh, showIdx, dis){
     return `<div class="cost-line">
   <div style="flex:1;min-width:120px"><div class="cost-line-label">${esc(lbl)}
     <label style="display:inline-flex;align-items:center;gap:4px;font-size:11px;margin-left:6px;cursor:pointer" title="${M('开=计入成本；关=灰显，仅展示不计入','On = counted; off = greyed, shown only','Sí = se cuenta; no = atenuado, solo se muestra')}"><input type="checkbox" ${on?'checked':''} ${dis} style="width:auto;flex:0 0 auto;margin:0" onchange="onMcscToggle(${showIdx},this.checked)">${M('计入','Count','Contar')}</label></div>
-    <div class="cost-line-ref" style="margin-top:2px;line-height:1.45">${M('法定口径：座位数','Statutory: seats','Legal: aforo')} ${fmt(sh.capacity||0)} ${M('× 平均票价 ¥','× avg price ¥','× precio medio ¥')}${fmt(Math.round(_avg))} × 4% = <b>¥${fmt(legal)}</b>${on?'':'　<span style="color:#d08700">'+M('（已关闭·不计入损益）','(off · not counted)','(desactivado · no se cuenta)')+'</span>'}<br><span class="text-muted">${M('原创曲目可关闭(≈0)；翻唱多按票房2.5–3%；海外中文翻唱建议咨询音著协。实际是否缴纳由你决定。','Original repertoire can be turned off (≈0); cover-heavy shows ~2.5–3% of gross; for overseas Chinese covers consult MCSC. Whether to actually pay is your call.','El repertorio original puede desactivarse (≈0); shows con muchas versiones ~2,5–3% del bruto; para versiones en chino en el extranjero consulta a la MCSC. Pagar o no es decisión tuya.')}</span></div></div>
+    <div class="cost-line-ref" style="margin-top:2px;line-height:1.45">${M('法定口径：座位数','Statutory: seats','Legal: aforo')} ${fmt(sh.capacity||0)} ${M('× 平均票价 ¥','× avg price ¥','× precio medio ¥')}${fmt(Math.round(_avg))} × 4% = <b>${cm(legal)}</b>${on?'':'　<span style="color:#d08700">'+M('（已关闭·不计入损益）','(off · not counted)','(desactivado · no se cuenta)')+'</span>'}<br><span class="text-muted">${M('原创曲目可关闭(≈0)；翻唱多按票房2.5–3%；海外中文翻唱建议咨询音著协。实际是否缴纳由你决定。','Original repertoire can be turned off (≈0); cover-heavy shows ~2.5–3% of gross; for overseas Chinese covers consult MCSC. Whether to actually pay is your call.','El repertorio original puede desactivarse (≈0); shows con muchas versiones ~2,5–3% del bruto; para versiones en chino en el extranjero consulta a la MCSC. Pagar o no es decisión tuya.')}</span></div></div>
   <input type="text" value="${M('座位×均价×4%','seats×avg×4%','aforo×medio×4%')}" disabled style="background:#f3f4f8;color:#bbb;text-align:center;font-size:11px">
   <input type="text" value="—" disabled style="background:#f3f4f8;color:#bbb;text-align:center">
-  <input type="number" value="${legal||''}" placeholder="0" disabled style="background:#f3f4f8;color:${amtColor}" title="${M('法定版权费','Statutory copyright fee','Canon de autor legal')} ¥${fmt(legal)}${on?M('（计入成本）',' (counted)',' (contado)'):M('（已关闭，不计入）',' (off, not counted)',' (desactivado, no contado)')}">
+  <input type="number" value="${legal||''}" placeholder="0" disabled style="background:#f3f4f8;color:${amtColor}" title="${M('法定版权费','Statutory copyright fee','Canon de autor legal')} ${cm(legal)}${on?M('（计入成本）',' (counted)',' (contado)'):M('（已关闭，不计入）',' (off, not counted)',' (desactivado, no contado)')}">
 </div>`;
   }
   const upVal = c.unitPrice > 0 ? c.unitPrice : '';
@@ -3023,9 +3029,9 @@ function renderCostLine(item, sh, showIdx, dis){
   const rentRef = _rentFallback ? `<div class="cost-line-ref" style="color:#d08700">* 数据库无该场馆周末场租，已沿用周五价（请核实）</div>` : '';
   return `<div class="cost-line">
   <div style="flex:1;min-width:120px"><div class="cost-line-label">${esc(lbl)}${rentStar} <span class="text-muted">${unitLabel}</span></div>${item.subtitle?`<div class="cost-line-ref" style="margin-top:2px;line-height:1.3">${esc(item.subtitle)}</div>`:''}${splitHint}${rentRef}</div>
-  <input type="number" id="unit-${showIdx}-${item.key}" placeholder="¥0.00" value="${upVal}" min="0" step="10" ${dis} oninput="onCostUnit(${showIdx},'${item.key}',+this.value)">
+  <input type="number" id="unit-${showIdx}-${item.key}" placeholder="${curSym()}0.00" value="${mIn(upVal)}" min="0" step="10" ${dis} oninput="onCostUnit(${showIdx},'${item.key}',mWr(this.value))">
   <input type="number" id="qty-${showIdx}-${item.key}" placeholder="0" value="${qtyVal}" min="1" step="1" ${dis} oninput="onCostQty(${showIdx},'${item.key}',+this.value)">
-  <input type="number" id="amt-${showIdx}-${item.key}" value="${c.amount||''}" placeholder="0" min="0" step="100" ${dis} ${amtTooltip} oninput="onCost(${showIdx},'${item.key}',+this.value)">
+  <input type="number" id="amt-${showIdx}-${item.key}" value="${mIn(c.amount)}" placeholder="0" min="0" step="100" ${dis} ${amtTooltip} oninput="onCost(${showIdx},'${item.key}',mWr(this.value))">
   
 </div>`;
 }
@@ -3041,6 +3047,10 @@ function ensureOffer(){
   if(o.bonusPerTicket===undefined)o.bonusPerTicket=0;
   if(o.promoterPct===undefined)o.promoterPct=80;
   if(o.cushionPct===undefined)o.cushionPct=10;
+  if(o.targetMargin===undefined)o.targetMargin=40;
+  if(o.floorMargin===undefined)o.floorMargin=15;
+  if(o.marketPct===undefined)o.marketPct=30;
+  if(o.assumeOcc===undefined)o.assumeOcc=70;
   return o;
 }
 // 层1 NPBO（满场净潜在总票房）+ 层2 建议保底/占比 + 回本点/起征点。复用系统平台费+VAT，只把上座率拉满。
@@ -3051,7 +3061,7 @@ function computeOffer(sh){
   const avgPrice= sold>0 ? r.gross/sold : 0;                 // 票档加权均价（票面）
   const fullGross= cap*avgPrice;                             // 满场票面总票房
   const pfFull= (typeof showPlatformFee==='function') ? showPlatformFee(sh, fullGross) : 0;
-  const vatFull= fullGross*((state.businessTaxRate||0)/100);
+  const vatFull= vatOf(fullGross);
   const NPBO= Math.max(0, fullGross - pfFull - vatFull);     // 满场净潜在总票房
   const suggested= NPBO*0.30;                                // 建议保底 = NPBO×30%
   const guaCNY= r.guaPerShow||0;                             // 当前保底（CNY）
@@ -3060,66 +3070,120 @@ function computeOffer(sh){
   const expenses= r.promoterCost||0;                         // 本地运营成本（不含保底）
   const bep= netPerSeat>0 ? (guaCNY+expenses)/netPerSeat : 0;// 回本张数
   const _cush=(state.offer&&state.offer.cushionPct!=null)?+state.offer.cushionPct:10;
-  const splitPoint= bep*(1+_cush/100);                       // 起征点 = 回本×(1+保护垫%)
-  return {cap,avgPrice,fullGross,NPBO,suggested,guaCNY,ratio,netPerSeat,expenses,bep,splitPoint};
+  const splitPoint= bep*(1+_cush/100);                       // 起征点(旧·兼容)
+  // [v3.8.98] 目标利润率反推 + 上座率假设驱动
+  const tm=(state.offer&&state.offer.targetMargin!=null)?+state.offer.targetMargin:40;
+  const occA=(state.offer&&state.offer.assumeOcc!=null)?+state.offer.assumeOcc:70;
+  const rOcc=calcShow(sh, occA);
+  const grossOcc=rOcc.gross||0, netOcc=rOcc.net||0, netPotOcc=rOcc.netPotential||0, expensesOcc=rOcc.promoterCost||0;
+  const ceilGua=Math.max(0, netPotOcc - (tm/100)*netOcc);   // 建议保底·开价（利润率口径=净票房 NBOR）
+  const fm=(state.offer&&state.offer.floorMargin!=null)?+state.offer.floorMargin:15;
+  const floorGua=Math.max(0, netPotOcc - (fm/100)*netOcc);       // 保底上限（最低利润率=保本+fm）
+  const marketPct=(state.offer&&state.offer.marketPct!=null)?+state.offer.marketPct:30;
+  const marketRef=Math.max(0, netOcc*(marketPct/100));        // 市场参照（净票房×可编辑%）
+  const redline=Math.max(0, netPotOcc);                      // 保本上限（保底=净潜力→利润0）
+  const splitPointOcc=Math.round((occA/100)*cap);            // 起征点 = 上座率假设×容量
+  const bonusSuggest=Math.max(0, Math.round((1-tm/100)*netPerSeat)); // 守住利润率的建议单票奖金
+  return {cap,avgPrice,fullGross,NPBO,suggested,guaCNY,ratio,netPerSeat,expenses,bep,splitPoint,
+          tm,fm,marketPct,occA,grossOcc,netOcc,netPotOcc,expensesOcc,ceilGua,floorGua,marketRef,redline,splitPointOcc,bonusSuggest};
 }
 function offerToggleSplit(){ ensureOffer().splitEnabled=!state.offer.splitEnabled; render(); }
 function offerSetSplit(v){ ensureOffer().splitEnabled=!!v; render(); }   // [v3.8.27/#8] 分段切换
 function offerSetMode(m){ ensureOffer().splitMode=m; render(); }
-function onOfferBonus(v){ ensureOffer().bonusPerTicket=Math.max(0,+v||0); render(); }
+function onOfferBonus(v){ ensureOffer().bonusPerTicket=Math.max(0,(+v||0)*curRate()); render(); }
 function onOfferPct(v){ ensureOffer().promoterPct=Math.max(0,Math.min(100,+v||0)); render(); }
 function onOfferCushion(v){ ensureOffer().cushionPct=Math.max(0,Math.min(100,+v||0)); render(); }
-function offerApplySuggested(idx){ const sh=state.shows[idx]; if(!sh) return; const x=computeOffer(sh); const eg=(sh._offerEditGua!=null && sh._offerEditGua!=='')?+sh._offerEditGua:Math.round(x.suggested); sh._guarantee=Math.round(eg); sh.guaranteeCur='CNY'; if(!sh.guaranteeType)sh.guaranteeType='per_show'; render(); }
+function onOfferTargetMargin(v){ ensureOffer().targetMargin=Math.max(0,Math.min(90,+v||0)); render(); }
+function onOfferAssumeOcc(v){ ensureOffer().assumeOcc=Math.max(10,Math.min(100,+v||0)); render(); }
+function onOfferFloorMargin(v){ ensureOffer().floorMargin=Math.max(0,Math.min(60,+v||0)); render(); }
+function onOfferMarketPct(v){ ensureOffer().marketPct=Math.max(0,Math.min(100,+v||0)); render(); }
+function offerApplySuggested(idx){ const sh=state.shows[idx]; if(!sh) return; const x=computeOffer(sh); const eg=(sh._offerEditGua!=null && sh._offerEditGua!=='')?+sh._offerEditGua:Math.round(x.ceilGua); sh._guarantee=Math.round(eg); sh.guaranteeCur='CNY'; if(!sh.guaranteeType)sh.guaranteeType='per_show'; render(); }
 function onOfferEditGua(idx, v){ const sh=state.shows[idx]; if(!sh) return; sh._offerEditGua=(v===''?'':Math.max(0,+v||0)); render(); }
+function offerUseSuggested(idx){ const sh=state.shows[idx]; if(!sh) return; sh._offerEditGua=Math.round(computeOffer(sh).ceilGua); render(); }
 
+function onSponsorInput(v){
+  const idx=state.activeShowIdx; const sh=state.shows[idx]; if(!sh) return;
+  sh.sponsorship=Math.max(0,mWr(v)); recompute();
+  const r=calcShow(sh);
+  const set=(id_,txt)=>{ const e=id(id_); if(e) e.innerHTML=txt; };
+  set('bo-netpot-'+idx, cm(r.netPotential));
+  set('bo-profit-'+idx, cm(r.promoterProfit));
+  set('card-netpot-'+idx, fmtY2(r.netPotential));
+  set('card-profit-'+idx, fmtY2(r.promoterProfit));
+  set('card-pct-'+idx, fmtP(r.promoterPct));
+  if(typeof renderPnlRail==='function') renderPnlRail();
+  if(typeof renderFeeAnchor==='function') renderFeeAnchor();
+}
 function renderOfferPanel(sh, idx){
   const o=ensureOffer(); const x=computeOffer(sh);
-  const editGua=(sh._offerEditGua!=null && sh._offerEditGua!=='')?+sh._offerEditGua:Math.round(x.suggested);
-  const pct=x.NPBO>0?editGua/x.NPBO*100:0;
-  const rk = pct<35 ? {c:'#16a34a',t:'🟢 安全',bg:'#f0fdf4'} : (pct<=45 ? {c:'#d97706',t:'🟡 警告',bg:'#fffbeb'} : {c:'#dc2626',t:'🔴 阻断',bg:'#fef2f2'});
+  const editGua=(sh._offerEditGua!=null && sh._offerEditGua!=='')?+sh._offerEditGua:((sh._guarantee!=null)?+sh._guarantee:Math.round(x.ceilGua));
+  const rNet = x.netOcc>0 ? editGua/x.netOcc*100 : 0;
+  const rPot = x.netPotOcc>0 ? editGua/x.netPotOcc*100 : 0;
+  const rCost= (x.expensesOcc+editGua)>0 ? editGua/(x.expensesOcc+editGua)*100 : 0;
+  const marginNow = x.netOcc>0 ? (x.netPotOcc-editGua)/x.netOcc*100 : 0;
+  const hit = marginNow>=x.tm-0.05;
+  const mcol = hit?'#16a34a':(marginNow>=x.tm*0.6?'#d97706':'#dc2626');
+  const overRed = editGua>x.redline;
   let dealHTML;
   if(!o.splitEnabled){
-    dealHTML = `<div style="font-size:13px;color:#444;line-height:1.7"><b>一口价买断（Flat）</b>：艺人只拿保底；超出回本点的票房 <b>100% 归主办</b>。<div style="margin-top:6px;padding:8px 10px;background:#f8fafc;border-radius:8px">📍 回本点 BEP = <b>${fmt(x.bep)} 张</b>（卖到此张数即回本，含保底 + 本地运营成本）</div></div>`;
+    dealHTML=`<div style="font-size:13px;color:#444;line-height:1.7"><b>一口价买断（Flat）</b>：艺人只拿保底；超出回本点的票房 <b>100% 归主办</b>。<div style="margin-top:6px;padding:8px 10px;background:#f8fafc;border-radius:8px">📍 回本点 BEP = <b>${fmt(x.bep)} 张</b>（卖到此即回本，含保底+本地运营成本）</div></div>`;
   } else {
-    const modeSel = `<select onchange="offerSetMode(this.value)" style="font-size:12px;padding:3px 6px;border:1px solid #dde1ef;border-radius:6px"><option value="fixed" ${o.splitMode==='fixed'?'selected':''}>固定单票奖金</option><option value="pct" ${o.splitMode==='pct'?'selected':''}>比例分红</option></select>`;
-    let modeHTML;
+    const sp=x.splitPointOcc;
+    const modeSel=`<select onchange="offerSetMode(this.value)" style="font-size:12px;padding:3px 6px;border:1px solid #dde1ef;border-radius:6px"><option value="fixed" ${o.splitMode==='fixed'?'selected':''}>固定单票奖金</option><option value="pct" ${o.splitMode==='pct'?'selected':''}>比例分红</option></select>`;
+    let modeHTML, _maxBonus=0;
     if(o.splitMode==='fixed'){
-      const overTix=Math.max(0, x.cap - x.splitPoint);
-      const bonusAmt=(o.bonusPerTicket||0)*overTix;
-      modeHTML = `单票奖金 ¥<input type="number" value="${o.bonusPerTicket||''}" min="0" step="10" placeholder="如 20" style="width:80px;font-size:12px;padding:3px 6px;border:1px solid #dde1ef;border-radius:6px" oninput="onOfferBonus(this.value)"><div style="margin-top:6px;font-size:12px;color:#555">满场时超过起征点约 <b>${fmt(overTix)}</b> 张 × ¥${fmt(o.bonusPerTicket||0)} ≈ <b>¥${fmt(bonusAmt)}</b> 给艺人（约占满场净利 ${fmtP(x.NPBO>0?bonusAmt/x.NPBO*100:0)}）</div>`;
+      const overTix=Math.max(0,x.cap-sp); const bonusAmt=(o.bonusPerTicket||0)*overTix; _maxBonus=bonusAmt;
+      const _bptDisp=o.bonusPerTicket?(state.displayCur==='CNY'?o.bonusPerTicket:+(o.bonusPerTicket/curRate()).toFixed(2)):'';
+      const _bSugDisp=state.displayCur==='CNY'?x.bonusSuggest:+(x.bonusSuggest/curRate()).toFixed(2);
+      modeHTML=`单票奖金 ${curSym()}<input type="number" value="${_bptDisp}" min="0" step="10" placeholder="${_bSugDisp}" style="width:80px;font-size:12px;padding:3px 6px;border:1px solid #dde1ef;border-radius:6px" oninput="onOfferBonus(this.value)"><span style="font-size:11px;color:#888;margin-left:6px">建议 ${cm(x.bonusSuggest)}/张（守住 ${fmtP(x.tm)} 利润率）</span><div style="margin-top:6px;font-size:12px;color:#555">满场超起征点 <b>${fmt(overTix)}</b> 张 × ${cm(o.bonusPerTicket||0)} ≈ <b>${cm(bonusAmt)}</b> 给艺人</div>`;
     } else {
-      const aPct=Math.max(0,100-(o.promoterPct||0));
-      modeHTML = `主办 <input type="number" value="${o.promoterPct}" min="0" max="100" style="width:56px;font-size:12px;padding:3px 6px;border:1px solid #dde1ef;border-radius:6px" oninput="onOfferPct(this.value)">% / 艺人 <b>${aPct}%</b><div style="margin-top:6px;font-size:12px;color:#555">超过起征点后的<b>超额利润</b>按此比例划拨</div>`;
+      const aPct=Math.max(0,100-(o.promoterPct||0)); _maxBonus=(aPct/100)*Math.max(0,(x.cap-sp)*x.netPerSeat);
+      modeHTML=`主办 <input type="number" value="${o.promoterPct}" min="0" max="100" style="width:56px;font-size:12px;padding:3px 6px;border:1px solid #dde1ef;border-radius:6px" oninput="onOfferPct(this.value)">% / 艺人 <b>${aPct}%</b><span style="font-size:11px;color:#888;margin-left:6px">守 ${fmtP(x.tm)} 利润率 → 主办应留 ${fmtP(x.tm)}</span><div style="margin-top:6px;font-size:12px;color:#555">超起征点后的<b>超额净利</b>按此比例划拨</div>`;
     }
-    let _maxBonus=0;
-    if(o.splitMode==='fixed'){ _maxBonus=(o.bonusPerTicket||0)*Math.max(0,x.cap-x.splitPoint); }
-    else { const _aPct=Math.max(0,100-(o.promoterPct||0))/100; _maxBonus=_aPct*Math.max(0,(x.cap-x.splitPoint)*x.netPerSeat); }
     const _walkout=editGua+_maxBonus;
-    const _walkCard=`<div style="margin-top:10px;padding:10px 12px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px"><div style="font-size:12px;color:#15803d;font-weight:700">🎤 艺人满场落袋 Walk-out（税前）</div><div style="font-size:20px;font-weight:800;color:#16a34a">¥${fmt(Math.round(_walkout))}</div><div style="font-size:11px;color:#777;margin-top:2px">= 保底 ¥${fmt(Math.round(editGua))} + 满场最大分红 ¥${fmt(Math.round(_maxBonus))} · <b>less WHT（预扣税由经纪方自行代扣）</b></div></div>`;
-    dealHTML = `<div style="font-size:13px;color:#444;line-height:1.7"><b>保底 + 分红（Plus Deal）</b>：起征点 Split Point = 回本点 × (1 + <input type="number" value="${(state.offer&&state.offer.cushionPct!=null)?state.offer.cushionPct:10}" min="0" max="100" step="1" style="width:50px;font-size:12px;padding:2px 5px;border:1px solid #dde1ef;border-radius:5px" oninput="onOfferCushion(this.value)">% 利润保护垫) = <b>${fmt(x.splitPoint)} 张</b><div style="margin-top:8px;display:flex;align-items:center;gap:10px;flex-wrap:wrap">分账模式：${modeSel}</div><div style="margin-top:8px">${modeHTML}</div>${_walkCard}</div>`;
+    const _walkCard=`<div style="margin-top:10px;padding:10px 12px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px"><div style="font-size:12px;color:#15803d;font-weight:700">🎤 艺人满场落袋 Walk-out（税前）</div><div style="font-size:20px;font-weight:800;color:#16a34a">${cm(Math.round(_walkout))}</div><div style="font-size:11px;color:#777;margin-top:2px">= 保底 ${cm(Math.round(editGua))} + 满场最大分红 ${cm(Math.round(_maxBonus))} · <b>less WHT（经纪方代扣）</b></div></div>`;
+    dealHTML=`<div style="font-size:13px;color:#444;line-height:1.7"><b>保底 + 分红（Plus Deal）</b>：起征点 Split Point = 上座率假设 <b>${fmtP(x.occA)}</b> × 容量 = <b>${fmt(sp)} 张</b>（卖超这条线，艺人才开始分）<div style="margin-top:8px;display:flex;align-items:center;gap:10px;flex-wrap:wrap">分账模式：${modeSel}</div><div style="margin-top:8px">${modeHTML}</div>${_walkCard}</div>`;
   }
+  const anchor=(lbl,val,col,bg,bd,note)=>`<div style="flex:1;min-width:150px;padding:10px 12px;border:1.5px solid ${bd};border-radius:10px;background:${bg}"><div style="font-size:11.5px;color:#777">${lbl}</div><div style="font-size:18px;font-weight:800;color:${col}">${cm(val)}</div>${note?`<div style="font-size:10.5px;color:#999;margin-top:2px">${note}</div>`:''}</div>`;
+  const ratioCell=(lbl,p,hint)=>`<div style="flex:1;min-width:110px;text-align:center;padding:8px 6px;border:1px solid #e2e6f3;border-radius:8px"><div style="font-size:11px;color:#888">${lbl}</div><div style="font-size:16px;font-weight:800;color:#4f46e5">${fmtP(p)}</div><div style="font-size:10px;color:#aaa">${hint}</div></div>`;
   return `<div style="margin-top:24px;border:1.5px solid #c7d2fe;border-radius:12px;overflow:hidden">
-    <div style="padding:12px 16px;background:linear-gradient(120deg,#eef2ff,#e0e7ff);font-weight:800;color:#3730a3;font-size:15px">💰 我方 Offer 测算（本场 · ${esc(sh.city||'')}）</div>
+    <div style="padding:12px 16px;background:linear-gradient(120deg,#eef2ff,#e0e7ff);font-weight:800;color:#3730a3;font-size:15px">💰 定价决策区（本场 · ${esc(sh.city||'')}）</div>
     <div style="padding:16px">
-      <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 14px;background:#1e1b4b;color:#fff;border-radius:10px;flex-wrap:wrap;gap:8px">
-        <div><div style="font-size:11px;opacity:.85">① 净潜在总票房 NPBO（满场 = 容量×均价×(1−平台费−VAT)）</div><div style="font-size:11px;opacity:.6;margin-top:2px">${fmt(x.cap)} 容量 × ¥${fmt(x.avgPrice)} 均价 · 满场票面 ¥${fmt(x.fullGross)}</div></div>
-        <div style="font-size:24px;font-weight:800">¥${fmt(x.NPBO)}</div>
+      <div style="display:flex;gap:14px;flex-wrap:wrap;align-items:center;margin-bottom:12px">
+        <div style="display:flex;align-items:center;gap:6px"><span style="font-size:12px;color:#555;font-weight:600">🎯 目标利润率</span><input type="number" value="${x.tm}" min="0" max="90" step="1" style="width:54px;font-size:14px;font-weight:800;color:#3730a3;text-align:center;padding:3px 4px;border:1.5px solid #c7d2fe;border-radius:6px" oninput="onOfferTargetMargin(this.value)"><span style="font-size:12px;color:#555">%</span></div>
+        <div style="display:flex;align-items:center;gap:6px"><span style="font-size:12px;color:#555;font-weight:600">🛡️ 最低利润率</span><input type="number" value="${x.fm}" min="0" max="60" step="1" style="width:54px;font-size:14px;font-weight:800;color:#b45309;text-align:center;padding:3px 4px;border:1.5px solid #fcd34d;border-radius:6px" oninput="onOfferFloorMargin(this.value)"><span style="font-size:12px;color:#555">%</span></div>
+        <div style="display:flex;align-items:center;gap:6px"><span style="font-size:12px;color:#555;font-weight:600">📊 上座率假设</span><input type="number" value="${x.occA}" min="10" max="100" step="5" style="width:58px;font-size:14px;font-weight:800;color:#3730a3;text-align:center;padding:3px 4px;border:1.5px solid #c7d2fe;border-radius:6px" oninput="onOfferAssumeOcc(this.value)"><span style="font-size:12px;color:#555">%</span></div>
+        <span style="font-size:11px;color:#999">改这两个数 → 下方建议保底/起征点/Offer 实时联动</span>
       </div>
-      <div style="margin-top:12px;display:flex;gap:12px;flex-wrap:wrap">
-        <div style="flex:1;min-width:200px;padding:10px 12px;border:1px solid #e2e6f3;border-radius:10px">
-          <div style="font-size:12px;color:#888">② 建议保底（NPBO × 30%，可改）</div>
-          <div style="display:flex;align-items:center;gap:3px;margin:4px 0"><span style="font-size:18px;font-weight:800;color:#2d3a8c">¥</span><input type="number" id="offer-editgua-${idx}" value="${editGua}" min="0" step="1000" style="font-size:17px;font-weight:800;color:#2d3a8c;width:128px;padding:2px 6px;border:1px solid #dde1ef;border-radius:6px" oninput="onOfferEditGua(${idx},this.value)"></div>
-          <button class="btn btn-ghost btn-xs" onclick="offerApplySuggested(${idx})">应用为本场保底</button>
-          <div style="font-size:11px;color:#aaa;margin-top:3px">默认 NPBO×30% = ¥${fmt(Math.round(x.suggested))}</div>
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:#1e1b4b;color:#fff;border-radius:10px;flex-wrap:wrap;gap:8px">
+        <div style="font-size:11.5px;opacity:.92">① 在 <b>${fmtP(x.occA)}</b> 上座下：票面 ${cm(x.grossOcc)} · <b>净票房(营收 NBOR)</b> ${cm(x.netOcc)} · 净潜力 ${cm(x.netPotOcc)}</div>
+        <div style="font-size:11px;opacity:.6">满场净潜在 NPBO ${cm(x.NPBO)}（参考）</div>
+      </div>
+      <div style="margin-top:12px;font-weight:700;color:#3730a3;font-size:13px">② 保底区间（第一轮可在此区间内 play）</div>
+      <div style="margin-top:6px;display:flex;gap:10px;flex-wrap:wrap">
+        ${anchor('建议保底·开价（目标 '+fmtP(x.tm)+'）',x.ceilGua,'#16a34a','#f0fdf4','#86efac','最划算 · 净潜力@occ − '+fmtP(x.tm)+'×净票房')}
+        <div style="flex:1;min-width:150px;padding:10px 12px;border:1.5px solid #c7d2fe;border-radius:10px;background:#eef2ff"><div style="font-size:11.5px;color:#777">市场参照（净票房 × <input type="number" value="${x.marketPct}" min="0" max="100" step="1" style="width:40px;font-size:11px;font-weight:700;text-align:center;padding:1px 2px;border:1px solid #c7d2fe;border-radius:4px" oninput="onOfferMarketPct(this.value)">%）</div><div style="font-size:18px;font-weight:800;color:#3730a3">${cm(x.marketRef)}</div><div style="font-size:10.5px;color:#999;margin-top:2px">行业惯例锚</div></div>
+        ${anchor('保底上限（最低 '+fmtP(x.fm)+' = 保本+'+fmtP(x.fm)+'）',x.floorGua,'#d97706','#fffbeb','#fcd34d','能给的最高 · 再高跌破 '+fmtP(x.fm)+' 底线')}
+        ${anchor('🔴 红线·保本（0 利润）',x.redline,'#dc2626','#fef2f2','#fecaca','绝对上限 · 超过=本上座率下亏损')}
+      </div>
+      <div style="margin-top:12px;display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end">
+        <div style="flex:1;min-width:230px;padding:10px 12px;border:1px solid #e2e6f3;border-radius:10px">
+          <div style="font-size:12px;color:#888">本场保底（可改，默认=建议保底）</div>
+          <div style="display:flex;align-items:center;gap:3px;margin:4px 0;flex-wrap:wrap"><span style="font-size:18px;font-weight:800;color:#2d3a8c">${curSym()}</span><input type="number" id="offer-editgua-${idx}" value="${editGua}" min="0" step="1000" style="font-size:17px;font-weight:800;color:#2d3a8c;width:130px;padding:2px 6px;border:1px solid #dde1ef;border-radius:6px" oninput="onOfferEditGua(${idx},this.value)"><button class="btn btn-ghost btn-xs" style="margin-left:6px" onclick="offerUseSuggested(${idx})">↩ 用建议 ${cm(x.ceilGua)}</button><button class="btn btn-ghost btn-xs" style="margin-left:4px" onclick="offerApplySuggested(${idx})">✓ 写入本场</button></div>
+          ${overRed?'<div style="color:#dc2626;font-weight:700;font-size:12px">⛔ 已超红线，本上座率下会亏损！</div>':''}
         </div>
-        <div style="flex:1;min-width:200px;padding:10px 12px;border:1px solid ${rk.c};border-radius:10px;background:${rk.bg}">
-          <div style="font-size:12px;color:#888">该保底占 NPBO</div>
-          <div style="font-size:18px;font-weight:800;color:${rk.c}">${fmtP(pct)} · ${rk.t}</div>
-          <div style="font-size:11px;color:#777;margin-top:2px">随左侧「建议保底」实时联动 · 点「应用」写入本场</div>
-          ${pct>45?'<div style="color:#dc2626;font-weight:700;margin-top:4px;font-size:12px">⛔ 保底占比过高，已极度压缩本地运营成本空间！</div>':''}
+        <div style="flex:1;min-width:200px;padding:10px 12px;border:1.5px solid ${mcol};border-radius:10px;background:${hit?'#f0fdf4':'#fffbeb'}">
+          <div style="font-size:12px;color:#888">该保底 @${fmtP(x.occA)} 上座的实际利润率 <span style="font-size:10px;color:#aaa">(利润÷净票房)</span></div>
+          <div style="font-size:20px;font-weight:800;color:${mcol}">${fmtP(marginNow)} ${hit?'✅ 达标':'⚠️ 低于目标'}</div>
+          <div style="font-size:11px;color:#777;margin-top:2px">目标 ${fmtP(x.tm)}${hit?'（有余量）':'（需调低保底或上调上座率假设）'}</div>
         </div>
       </div>
-      <div style="margin-top:12px;padding:12px;border:1px dashed #c7d2fe;border-radius:10px">
+      <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap">
+        ${ratioCell('保底 ÷ 净潜力',rPot,'风险刻度·主因')}
+        ${ratioCell('保底 ÷ 净票房',rNet,'对标 30% 惯例')}
+        ${ratioCell('保底 ÷ 总成本',rCost,'成本集中度')}
+      </div>
+      <div style="margin-top:14px;padding:12px;border:1px dashed #c7d2fe;border-radius:10px">
         <div style="font-weight:700;color:#3730a3;margin-bottom:8px">③ Offer 结构（二选一）</div>
         <div style="display:inline-flex;border:1.5px solid #c7d2fe;border-radius:8px;overflow:hidden;margin-bottom:10px">
           <button onclick="offerSetSplit(false)" style="border:none;padding:7px 16px;font-size:13px;font-weight:700;cursor:pointer;${!o.splitEnabled?'background:#4f46e5;color:#fff':'background:#fff;color:#3730a3'}">💵 一口价买断</button>
@@ -3178,12 +3242,13 @@ function renderS5(){
   <div class="notice notice-blue">
     总票房: <b>${fmtY(r.gross)}</b> &nbsp;|&nbsp;
     净票房: <b>${fmtY(r.net)}</b><span class="tooltip-wrap"><span class="info-icon">ⓘ</span><span class="tip">净票房 = 总票房 × (1 − 票务平台服务费率 − 税率)</span></span> &nbsp;|&nbsp;
-    演出成本: <b>${fmtY(r.promoterCost + r.guaPerShow)}</b><span class="tooltip-wrap"><span class="info-icon">ⓘ</span><span class="tip" style="white-space:normal;min-width:200px">演出成本 = 运营成本 ¥${fmt(r.promoterCost)} + 保底 ¥${fmt(r.guaPerShow)}（保底已划入演出成本）</span></span> &nbsp;|&nbsp;
+    演出成本: <b>${fmtY(r.promoterCost + r.guaPerShow)}</b><span class="tooltip-wrap"><span class="info-icon">ⓘ</span><span class="tip" style="white-space:normal;min-width:200px">演出成本 = 运营成本 ${cm(r.promoterCost)} + 保底 ${cm(r.guaPerShow)}（保底已划入演出成本）</span></span> &nbsp;|&nbsp;
     艺人VIP收入: <b>${fmtY(r.artistVIPIncome)}</b><span class="tooltip-wrap"><span class="info-icon">ⓘ</span><span class="tip">艺人VIP收入 = Price Lift × VIP目标售出量</span></span>
   </div>
+  <div class="card" style="border:1.5px solid #c3cae8;border-radius:12px;padding:14px;margin-bottom:14px;background:#fcfdff"><div style="font-size:14px;font-weight:800;color:#2d3a8c;margin-bottom:10px">${t('sens')}</div><table class="sens-table"><thead><tr>${t('sCols').map(c=>`<th>${c}</th>`).join('')}</tr></thead><tbody>${sensRows}</tbody></table></div>
   ${(()=>{
     const spon=sh.sponsorship||0;
-    const bizTaxAmt=r.gross*((state.businessTaxRate||0)/100);
+    const bizTaxAmt=vatOf(r.gross);
     const atp=r.soldTotal>0?r.gross/r.soldTotal:0;
     const beCost=(r.promoterCost-spon)+r.guaPerShow;
     const _netTix=r.soldTotal>0?r.net/r.soldTotal:0; const beTix=_netTix>0?beCost/_netTix:0;   // [v3.8.27/#5] 回本张数改用净票房/张，与 Offer BEP 统一
@@ -3198,14 +3263,14 @@ function renderS5(){
       ${line('Business Tax '+(state.businessTaxRate||0)+'%', -bizTaxAmt)}
       ${line('Adjusted Gross 调整后票房', r.net, true)}
       <div style="display:flex;justify-content:space-between;align-items:center;padding:3px 0"><span>Net Sponsorship 净赞助</span>
-        <input type="number" value="${spon||''}" min="0" placeholder="0" style="width:110px;text-align:right;font-size:12px;padding:3px 6px;border:1px solid #dde1ef;border-radius:4px" oninput="state.shows[${state.activeShowIdx}].sponsorship=+this.value;render()"></div>
+        <input type="number" value="${mIn(spon)}" min="0" placeholder="0" style="width:110px;text-align:right;font-size:12px;padding:3px 6px;border:1px solid #dde1ef;border-radius:4px" oninput="onSponsorInput(this.value)"></div>
       ${line('Total Expenses 演出成本', -r.promoterCost)}
-      ${line('Net Potential 净潜力', r.netPotential, true, r.netPotential>=0?'#2d3a8c':'#c53030')}
+      <div style="display:flex;justify-content:space-between;padding:3px 0;font-weight:700;border-top:1px solid #e2e6f3"><span>Net Potential 净潜力</span><span id="bo-netpot-${state.activeShowIdx}" style="color:${r.netPotential>=0?'#2d3a8c':'#c53030'}">${cm(r.netPotential)}</span></div>
       <div style="border-top:1px dashed #d7dcef;margin-top:6px;padding-top:6px">
-        <div style="display:flex;justify-content:space-between;padding:2px 0"><span>Avg Ticket Price 平均票价</span><span>¥${fmt(atp)}</span></div>
+        <div style="display:flex;justify-content:space-between;padding:2px 0"><span>Avg Ticket Price 平均票价</span><span>${cm(atp)}</span></div>
         <div style="display:flex;justify-content:space-between;padding:2px 0"><span>Breakeven 盈亏平衡</span><span>${fmt(beTix)} 张（${fmtP(bePctAdj)}）</span></div>
         ${line('Artist Guarantee 保底', -r.guaPerShow)}
-        ${line('Promoter Profit 主办收益', r.promoterProfit, true, r.promoterProfit>=0?'#38a169':'#c53030')}
+        <div style="display:flex;justify-content:space-between;padding:3px 0;font-weight:700;border-top:1px solid #e2e6f3"><span>Promoter Profit 主办收益</span><span id="bo-profit-${state.activeShowIdx}" style="color:${r.promoterProfit>=0?'#38a169':'#c53030'}">${cm(r.promoterProfit)}</span></div>
       </div>
     </div>
   </div>`;
@@ -3219,17 +3284,17 @@ function renderS5(){
     </div>
     <div class="roi-card">
       <div class="rc-label">${t('rcNetPot')} <span class="tooltip-wrap"><span class="info-icon">ⓘ</span><span class="tip">净潜力 = 净票房 − 主办成本合计</span></span></div>
-      <div class="rc-val ${cc(r.netPotential)}">${fmtY2(r.netPotential)}</div>
+      <div class="rc-val ${cc(r.netPotential)}" id="card-netpot-${state.activeShowIdx}">${fmtY2(r.netPotential)}</div>
       <div class="rc-sub">净票房 − 主办成本</div>
     </div>
     <div class="roi-card">
       <div class="rc-label">${t('rcProfit')} <span class="tooltip-wrap"><span class="info-icon">ⓘ</span><span class="tip">主办收益 = 净潜力 − 保底 − 艺人VIP收入</span></span></div>
-      <div class="rc-val ${cc(r.promoterProfit)}">${fmtY2(r.promoterProfit)}</div>
+      <div class="rc-val ${cc(r.promoterProfit)}" id="card-profit-${state.activeShowIdx}">${fmtY2(r.promoterProfit)}</div>
       <div class="rc-sub">净潜力 − 保底 − VIP分成</div>
     </div>
     <div class="roi-card">
       <div class="rc-label">${t('rcPct')} <span class="tooltip-wrap"><span class="info-icon">ⓘ</span><span class="tip">主办收益占比 = 主办收益 ÷ 净潜力</span></span></div>
-      <div class="rc-val ${r.promoterProfit<0?'neg':cc(r.promoterPct)}">${fmtP(r.promoterPct)}</div>
+      <div class="rc-val ${r.promoterProfit<0?'neg':cc(r.promoterPct)}" id="card-pct-${state.activeShowIdx}">${fmtP(r.promoterPct)}</div>
       <div class="rc-sub">主办收益 ÷ 净潜力</div>
     </div>
   </div>
@@ -3248,26 +3313,21 @@ function renderS5(){
     <div style="font-weight:800;color:#2d3a8c;margin-bottom:10px">🎤 本场 Artist Guarantee（倒推建议）</div>
     <div style="display:flex;gap:20px;flex-wrap:wrap;align-items:flex-end">
       <div><div style="font-size:11px;color:#888;font-weight:700">建议保底（目标ROI ${state.targetROI}%）</div>
-        <div style="font-size:24px;font-weight:800;color:${recGua>0?'#2d3a8c':'#c53030'}">¥${fmt(Math.max(0,recGua))}</div>
+        <div style="font-size:24px;font-weight:800;color:${recGua>0?'#2d3a8c':'#c53030'}">${cm(Math.max(0,recGua))}</div>
         <div style="font-size:11px;color:#888">≈ ${cur2sym()}${fmt(Math.max(0,recGua/cur2rate()))} · 公式：净票房 ÷ (1+ROI) − 演出成本</div></div>
       <div><div style="font-size:11px;color:#c53030;font-weight:700">🔴 盈亏平衡红线（上限）</div>
-        <div style="font-size:20px;font-weight:800;color:#c53030">¥${fmt(Math.max(0,redline))}</div>
+        <div style="font-size:20px;font-weight:800;color:#c53030">${cm(Math.max(0,redline))}</div>
         <div style="font-size:11px;color:#888">净票房 − 演出成本，超过即亏</div></div>
     </div>
     <div style="display:flex;gap:18px;flex-wrap:wrap;font-size:12px;color:#555;margin-top:10px;padding-top:8px;border-top:1px dashed #d7dcef">
-      <span>净票房 <b>¥${fmt(r.net)}</b></span>
-      <span>演出成本 <b>¥${fmt(r.promoterCost)}</b></span>
-      <span>平均票价 <b>¥${fmt(atp)}</b></span>
+      <span>净票房 <b>${cm(r.net)}</b></span>
+      <span>演出成本 <b>${cm(r.promoterCost)}</b></span>
+      <span>平均票价 <b>${cm(atp)}</b></span>
       <span>回本张数 <b>${fmt(beT)}</b>（${r.bePct>100?'需超售 '+(r.bePct-100).toFixed(1)+'%':fmtP(r.bePct)}）</span>
     </div>
-    <div style="margin-top:8px;font-size:12px">当前已填保底：<b>¥${fmt(entered)}</b> · <span style="color:${scol};font-weight:700">${status}</span></div>
+    <div style="margin-top:8px;font-size:12px">当前已填保底：<b>${cm(entered)}</b> · <span style="color:${scol};font-weight:700">${status}</span></div>
   </div>`;
   })():''}
-  <div style="font-size:13px;font-weight:700;color:#555;margin-bottom:10px">${t('sens')}</div>
-  <table class="sens-table">
-    <thead><tr>${t('sCols').map(c=>`<th>${c}</th>`).join('')}</tr></thead>
-    <tbody>${sensRows}</tbody>
-  </table>
 </div>
 ${isDemo?renderGuaranteeTour():''}`;
 }
@@ -3285,10 +3345,10 @@ function renderGuaranteeTour(){
       <td>${esc(sh.city||'城市'+(i+1))}</td>
       <td class="text-right">${fmtY(r.net)}</td>
       <td class="text-right">${fmtY(r.promoterCost)}</td>
-      <td class="text-right">¥${fmt(atp)}</td>
+      <td class="text-right">${cm(atp)}</td>
       <td class="text-right">${r.bePct>100?'超售'+(r.bePct-100).toFixed(0)+'%':fmtP(r.bePct)}</td>
-      <td class="text-right" style="font-weight:700;color:${recGua>0?'#2d3a8c':'#c53030'}">¥${fmt(Math.max(0,recGua))}</td>
-      <td class="text-right" style="color:#c53030">¥${fmt(Math.max(0,redline))}</td>
+      <td class="text-right" style="font-weight:700;color:${recGua>0?'#2d3a8c':'#c53030'}">${cm(Math.max(0,recGua))}</td>
+      <td class="text-right" style="color:#c53030">${cm(Math.max(0,redline))}</td>
     </tr>`;
   }).join('');
   const sumRec=state.shows.reduce((a,sh,i)=>a+(tour.results[i].net/(1+roi)-tour.results[i].promoterCost),0);
@@ -3302,14 +3362,14 @@ function renderGuaranteeTour(){
   <table class="tour-table">
     <thead><tr><th>城市</th><th class="text-right">净票房</th><th class="text-right">演出成本</th><th class="text-right">平均票价</th><th class="text-right">回本</th><th class="text-right">建议保底(ROI ${state.targetROI}%)</th><th class="text-right">🔴红线(平衡)</th></tr></thead>
     <tbody>${rows}</tbody>
-    <tfoot><tr style="font-weight:700"><td>各场合计</td><td class="text-right">${fmtY(tour.totNet)}</td><td class="text-right">${fmtY(tour.totPCost)}</td><td colspan="2"></td><td class="text-right" style="color:#2d3a8c">¥${fmt(Math.max(0,sumRec))}</td><td class="text-right" style="color:#c53030">¥${fmt(Math.max(0,sumRed))}</td></tr></tfoot>
+    <tfoot><tr style="font-weight:700"><td>各场合计</td><td class="text-right">${fmtY(tour.totNet)}</td><td class="text-right">${fmtY(tour.totPCost)}</td><td colspan="2"></td><td class="text-right" style="color:#2d3a8c">${cm(Math.max(0,sumRec))}</td><td class="text-right" style="color:#c53030">${cm(Math.max(0,sumRed))}</td></tr></tfoot>
   </table>
-  ${logi>0?`<div class="text-muted" style="font-size:12px;margin-top:6px">各场合计未含巡演共享/一次性巡演物流成本 ¥${fmt(logi)}（签证、TRAVEL DAY 等，一次性平摊到巡演）。</div>`:''}
+  ${logi>0?`<div class="text-muted" style="font-size:12px;margin-top:6px">各场合计未含巡演共享/一次性巡演物流成本 ${cm(logi)}（签证、TRAVEL DAY 等，一次性平摊到巡演）。</div>`:''}
   <div class="notice notice-blue" style="margin-top:8px">
-    <b>巡演建议保底：¥${fmt(Math.max(0,tourRec))}</b> ≈ $${fmt(Math.max(0,tourRec/er))} USD
-    &nbsp;|&nbsp; <span style="color:#c53030;font-weight:700">巡演红线：¥${fmt(Math.max(0,tourRed))}</span>
-    &nbsp;|&nbsp; 当前已设保底合计：<b>¥${fmt(tour.totGua)}</b>
-    <div style="font-size:12px;color:#666;margin-top:4px">公式：巡演净票房 ¥${fmt(tour.totNet)} ÷ (1+ROI ${state.targetROI}%) − 巡演主办成本 ¥${fmt(tour.totPromoterCost)}</div>
+    <b>巡演建议保底：${cm(Math.max(0,tourRec))}</b>
+    &nbsp;|&nbsp; <span style="color:#c53030;font-weight:700">巡演红线：${cm(Math.max(0,tourRed))}</span>
+    &nbsp;|&nbsp; 当前已设保底合计：<b>${cm(tour.totGua)}</b>
+    <div style="font-size:12px;color:#666;margin-top:4px">公式：巡演净票房 ${cm(tour.totNet)} ÷ (1+ROI ${state.targetROI}%) − 巡演主办成本 ${cm(tour.totPromoterCost)}</div>
   </div>
 </div>`;
 }
@@ -3350,15 +3410,15 @@ function renderPnlSumTab(){
   const trs=rows.map(x=>`<tr>
     <td>${esc(x.city)}<div style="font-size:11px;color:#aaa">${x.date}</div></td>
     <td class="text-right">${beTxt(x.bePct)}</td>
-    <td class="text-right">¥${fmt(Math.round(x.atp))}</td>
-    <td class="text-right" style="color:${x.profit>=0?'#2d3a8c':'#c53030'};font-weight:600">¥${fmt(Math.round(x.profit))}</td>
+    <td class="text-right">${cm(Math.round(x.atp))}</td>
+    <td class="text-right" style="color:${x.profit>=0?'#2d3a8c':'#c53030'};font-weight:600">${cm(Math.round(x.profit))}</td>
     <td class="text-right" style="color:${x.pct>=0?'#38a169':'#c53030'}">${fmtP(x.pct)}</td>
   </tr>`).join('');
   const card=(lbl,val,sub)=>`<div class="roi-card"><div class="rc-label">${lbl}</div><div class="rc-val">${val}</div>${sub?`<div class="rc-sub">${sub}</div>`:''}</div>`;
   return `<table class="tier-table">
     <thead><tr><th>城市</th><th class="text-right">盈亏平衡上座率</th><th class="text-right">平均票价</th><th class="text-right">主办收益</th><th class="text-right">主办收益%</th></tr></thead>
     <tbody>${trs}</tbody>
-    <tfoot><tr style="font-weight:700;border-top:2px solid #dde1ef"><td>合计 / 平均</td><td class="text-right">${beTxt(avgBE)}</td><td class="text-right">¥${fmt(Math.round(avgAtp))}</td><td class="text-right" style="color:${totProfit>=0?'#2d3a8c':'#c53030'}">¥${fmt(Math.round(totProfit))}</td><td class="text-right">${fmtP(avgPct)}</td></tr></tfoot>
+    <tfoot><tr style="font-weight:700;border-top:2px solid #dde1ef"><td>合计 / 平均</td><td class="text-right">${beTxt(avgBE)}</td><td class="text-right">${cm(Math.round(avgAtp))}</td><td class="text-right" style="color:${totProfit>=0?'#2d3a8c':'#c53030'}">${cm(Math.round(totProfit))}</td><td class="text-right">${fmtP(avgPct)}</td></tr></tfoot>
   </table>`;
 }
 
@@ -3369,7 +3429,7 @@ function renderRoutingTab(){
   // 合并演出日 + 行程日，按日期排序
   const items=[];
   state.shows.forEach((sh,i)=>items.push({kind:'show', idx:i, date:sh.date, type:'show', city:sh.city, venue:sh.venue, cap:sh.capacity,
-    gua:(sh._guarantee!==undefined?sh._guarantee:state.guaranteeAmt)||0, notes:sh.notes||'', perfTime:sh.perfTime||''}));
+    gua:(sh._guarantee!==undefined?sh._guarantee:state.guaranteeAmt)||0, gcur:(sh.guaranteeCur||state.guaranteeCur||'CNY'), notes:sh.notes||'', perfTime:sh.perfTime||''}));
   (state.logiDays||[]).forEach((ld,i)=>items.push({kind:'logi', idx:i, date:ld.date, type:ld.type, city:ld.city, venue:'—', cap:'', gua:0, notes:ld.notes||''}));
   items.sort((a,b)=>(a.date||'').localeCompare(b.date||''));
   const rows=items.map(it=>{
@@ -3383,7 +3443,7 @@ function renderRoutingTab(){
         <td>${esc(it.venue||'—')}</td>
         <td class="text-right">${fmt(it.cap)}</td>
         <td><input type="text" value="${esc(it.perfTime)}" placeholder="如 20:00–21:30" style="width:120px;font-size:12px;padding:3px 6px;border:1px solid #dde1ef;border-radius:4px" oninput="state.shows[${it.idx}].perfTime=this.value"></td>
-        <td class="text-right">$${fmt(it.gua)}</td>
+        <td class="text-right">${cm(it.gua)}</td>
         <td><input type="text" value="${esc(it.notes)}" placeholder="备注" style="width:160px;font-size:12px;padding:3px 6px;border:1px solid #dde1ef;border-radius:4px" oninput="state.shows[${it.idx}].notes=this.value"></td>
       </tr>`;
     }
@@ -3391,18 +3451,19 @@ function renderRoutingTab(){
       <td>${it.date||'—'}${dow}</td>
       <td><span style="display:inline-flex;align-items:center;gap:4px"><span style="width:8px;height:8px;border-radius:50%;background:${meta.color}"></span>${meta.icon}${meta.zh}</span></td>
       <td>${esc(it.city||'—')}</td>
-      <td colspan="3" class="text-muted">行程日（非演出）· 物流成本 ¥${fmt(logiDayTotal(state.logiDays[it.idx]))}</td>
+      <td colspan="3" class="text-muted">行程日（非演出）· 物流成本 ${cm(logiDayTotal(state.logiDays[it.idx]))}</td>
       <td></td>
       <td><input type="text" value="${esc(it.notes)}" placeholder="备注" style="width:160px;font-size:12px;padding:3px 6px;border:1px solid #dde1ef;border-radius:4px" oninput="state.logiDays[${it.idx}].notes=this.value"></td>
     </tr>`;
   }).join('');
-  const totGua=state.shows.reduce((a,sh)=>a+((sh._guarantee!==undefined?sh._guarantee:state.guaranteeAmt)||0),0);
+  const guaCNYof=(g,c)=>c==='USD'?g*er:c==='EUR'?g*(state.eurRate||7.9):g;
+  const totGuaCNY=state.shows.reduce((a,sh)=>a+guaCNYof(((sh._guarantee!==undefined?sh._guarantee:state.guaranteeAmt)||0),(sh.guaranteeCur||state.guaranteeCur||'CNY')),0);
   const showDays=state.shows.length, nonShow=(state.logiDays||[]).length;
   return `<div class="subsec-h0">🗺️ ${esc(state.artist||'巡演')} · Routing Grid</div>
   <div style="overflow-x:auto"><table class="tour-table">
-    <thead><tr><th>日期</th><th>日类型</th><th>城市</th><th>场馆</th><th class="text-right">容量</th><th>演出时段</th><th class="text-right">保底(USD)</th><th>备注</th></tr></thead>
+    <thead><tr><th>日期</th><th>日类型</th><th>城市</th><th>场馆</th><th class="text-right">容量</th><th>演出时段</th><th class="text-right">保底 Guarantee</th><th>备注</th></tr></thead>
     <tbody>${rows}</tbody>
-    <tfoot><tr style="font-weight:700"><td colspan="6">Total Guarantee</td><td class="text-right">$${fmt(totGua)}</td><td>≈ ¥${fmt(Math.round(totGua*er))}</td></tr></tfoot>
+    <tfoot><tr style="font-weight:700"><td colspan="6">Total Guarantee</td><td class="text-right">${cm(Math.round(totGuaCNY))}</td><td></td></tr></tfoot>
   </table></div>
   <div class="flex-row" style="gap:18px;margin-top:10px;font-size:13px;color:#555">
     <span>🎤 演出日 <b>${showDays}</b></span>
@@ -3437,16 +3498,16 @@ function renderTourMatrix(){
       ${numRow('上座率 %Sold', (c,t)=>t?fmtP(totCap?totSold/totCap*100:0):fmtP(c.sh.capacity?c.r.soldTotal/c.sh.capacity*100:0))}
       ${numRow('平均票价 Avg Net Price', (c,t)=>t?'':'¥'+fmt(c.r.soldTotal?Math.round(c.r.net/c.r.soldTotal):0))}
       ${sumRow('总票房 Gross', c=>c.r.gross)}
-      ${sumRow('减 税/平台费', c=>c.r.pfFee+(c.r.gross*((state.businessTaxRate||0)/100)))}
+      ${sumRow('减 税/平台费', c=>c.r.pfFee+vatOf(c.r.gross))}
       ${sumRow('净票房 Net', c=>c.r.net, true)}
-      ${sumRow('演出成本 Expenses', c=>c.r.promoterCost)}
-      ${sumRow('净潜力 Net Potential', c=>c.r.netPotential, true)}
+      ${sumRow('演出成本 Expenses（含行程日差旅平摊）', c=>c.r.promoterCost+(tour.extraCost/(cols.length||1)))}
+      ${sumRow('净潜力 Net Potential', c=>c.r.netPotential-(tour.extraCost/(cols.length||1)), true)}
       ${sumRow('保底 Guarantee', c=>c.r.guaPerShow)}
-      ${sumRow('主办收益 Promoter Profit', c=>c.r.promoterProfit, true)}
-      ${tour.extraCost>0?`<tr><td style="position:sticky;left:0;background:#fff">行程日差旅成本 Travel（巡演另计）</td><td class="text-right" style="font-weight:700;color:#c53030">-${fmtY(tour.extraCost)}</td>${cols.map(()=>'<td class="text-right" style="color:#bbb">—</td>').join('')}</tr><tr><td style="position:sticky;left:0;background:#eef0fb;font-weight:700">巡演净收益 Net（已扣差旅）</td><td class="text-right" style="font-weight:800;color:${tour.totProfit>=0?'#2d3a8c':'#c53030'}">${fmtY(tour.totProfit)}</td>${cols.map(()=>'<td></td>').join('')}</tr>`:''}
+      ${sumRow('主办收益 Promoter Profit', c=>c.r.promoterProfit-(tour.extraCost/(cols.length||1)), true)}
+      ${false?`<tr><td style="position:sticky;left:0;background:#fff">行程日差旅成本 Travel（巡演另计）</td><td class="text-right" style="font-weight:700;color:#c53030">-${fmtY(tour.extraCost)}</td>${cols.map(()=>'<td class="text-right" style="color:#bbb">—</td>').join('')}</tr><tr><td style="position:sticky;left:0;background:#eef0fb;font-weight:700">巡演净收益 Net（已扣差旅）</td><td class="text-right" style="font-weight:800;color:${tour.totProfit>=0?'#2d3a8c':'#c53030'}">${fmtY(tour.totProfit)}</td>${cols.map(()=>'<td></td>').join('')}</tr>`:''}
     </tbody>
   </table></div>
-  ${tour.extraCost>0?`<div class="text-muted" style="font-size:12px;margin-top:6px">巡演另计（一次性，未摊入各城列）：${tour.overhead&&tour.overhead.tourCrewPerDiem>0?`🍱 巡演工作团队餐补 ¥${fmt(tour.overhead.tourCrewPerDiem)}（餐标×人数×总停留 ${tour.overhead.totalStay} 天）`:''}${Math.round(tour.extraCost-(tour.overhead?tour.overhead.total:0))>0?`${tour.overhead&&tour.overhead.tourCrewPerDiem>0?' · ':''}🚌 行程日差旅成本 ¥${fmt(Math.round(tour.extraCost-(tour.overhead?tour.overhead.total:0)))}`:''} ＝ ¥${fmt(Math.round(tour.extraCost))}。巡演主办收益（已扣）：<b>${fmtY(tour.totProfit)}</b></div>`:''}`;
+  `;
 }
 
 function renderSimTab(){
@@ -3476,20 +3537,22 @@ function renderSumTab(){
     const dow=sh.date?getWeekday(sh.date):'';
     return `<tr><td>${esc(sh.city||'—')}</td><td>${esc(sh.venue||'—')}</td><td>${sh.date||'—'}${dow}</td>
     <td style="text-align:right">${fmt(sh.capacity)}</td>
-    <td style="text-align:right">$${fmt(gua)}</td>
+    <td style="text-align:right">${cm(gua)}</td>
     <td style="text-align:right ${cc(r.promoterProfit)}">${fmtY(r.promoterProfit)}</td></tr>`;
   }).join('');
-  const totGua=state.shows.reduce((a,sh)=>a+(sh._guarantee!==undefined?sh._guarantee:state.guaranteeAmt),0);
+  const _erS=state.exchangeRate||7.28;
+  const totGua=state.shows.reduce((a,sh)=>{const g=(sh._guarantee!==undefined?sh._guarantee:state.guaranteeAmt)||0;const c=sh.guaranteeCur||state.guaranteeCur||'CNY';return a+(c==='USD'?g*_erS:c==='EUR'?g*(state.eurRate||7.9):g);},0);
   return `${renderTourMatrix()}
   <div class="subsec-h">关键条款</div>
-  <div class="kv-row"><span>保底合计</span><span class="kv-val">$${fmt(totGua)} USD</span></div>
+  <div class="kv-row"><span>保底合计</span><span class="kv-val">${cm(Math.round(totGua))}</span></div>
   <div class="kv-row"><span>汇率</span><span class="kv-val">¥${state.exchangeRate}/USD</span></div>
   <div class="kv-row"><span>票务平台手续费率</span><span class="kv-val">${state.platformFeeRate}%</span></div>
   <div class="kv-row"><span>艺人预扣税(WHT)</span><span class="kv-val">${state.whtRate}% · 从艺人款代扣 · 最终支付=保底×(1−${state.whtRate}%) · 不计入演出成本</span></div>
   <div class="kv-row"><span>付款计划</span><input type="text" value="${esc(state.paymentPlan)}" oninput="state.paymentPlan=this.value" style="flex:1;max-width:62%;font-size:12px;padding:3px 6px;border:1px solid #dde1ef;border-radius:4px;text-align:right"></div>
   <div class="kv-row"><span>巡演净潜力</span><span class="kv-val ${cc(tour.totNetPot)}">${fmtY(tour.totNetPot)}</span></div>
   <div class="kv-row"><span>主办收益合计</span><span class="kv-val ${cc(tour.totProfit)}">${fmtY(tour.totProfit)}</span></div>
-  <div class="kv-row"><span>主办收益占比</span><span class="kv-val ${cc(tour.totPct())}">${fmtP(tour.totPct())}</span></div>`;
+  <div class="kv-row"><span>主办收益占比 <span style="font-size:11px;color:#999">(÷净潜力)</span></span><span class="kv-val ${cc(tour.totPct())}">${fmtP(tour.totPct())}</span></div>
+  <div class="kv-row"><span>巡演整体利润率 <span style="font-size:11px;color:#999">(利润率=总利润÷总净票房·对标老板 40%)</span></span><span class="kv-val ${cc(tour.totNet>0?tour.totProfit/tour.totNet*100:0)}">${fmtP(tour.totNet>0?tour.totProfit/tour.totNet*100:0)}</span></div>`;
 }
 
 function renderDdlTab(){
@@ -3518,7 +3581,8 @@ function renderDdlTab(){
   } else {
     ddlContent=`<div class="text-muted" style="padding:20px;text-align:center">请先添加演出日期</div>`;
   }
-  return `<div class="form-grid g3" style="margin-bottom:16px">
+  return `<div class="subsec-h">⏳ Offer 时间节点（报批 · 宣发排期）</div>
+  <div class="form-grid g3" style="margin-bottom:16px">
     <div class="field"><label>${t('permitDays')}</label><input type="number" id="f-permit-days" value="${state.permitDays}" min="1" ${dis} oninput="state.permitDays=+this.value;rerenderS6()"></div>
     <div class="field"><label>${t('mktDays')}</label><input type="number" id="f-mkt-days" value="${state.mktDays}" min="1" ${dis} oninput="state.mktDays=+this.value;rerenderS6()"></div>
     <div class="field"><label>${t('prepDays')}</label><input type="number" id="f-prep-days" value="${state.prepDays}" min="1" ${dis} oninput="state.prepDays=+this.value;rerenderS6()"></div>
@@ -3574,7 +3638,7 @@ function renderP2Backend(){
   const lift=200, split=0.5;
   const rows=d.map(([c,vip])=>{
     const total=vip*lift, artist=total*split, promoter=total-artist;
-    return `<tr><td>${c}</td><td class="text-right">${vip}</td><td class="text-right">¥${lift}</td><td class="text-right">${fmtY(total)}</td><td class="text-right" style="color:#c05621;font-weight:600">${fmtY(artist)}</td><td class="text-right pos">${fmtY(promoter)}</td></tr>`;
+    return `<tr><td>${c}</td><td class="text-right">${vip}</td><td class="text-right">${cm(lift)}</td><td class="text-right">${fmtY(total)}</td><td class="text-right" style="color:#c05621;font-weight:600">${fmtY(artist)}</td><td class="text-right pos">${fmtY(promoter)}</td></tr>`;
   }).join('');
   const tA=d.reduce((a,[c,v])=>a+v*lift*split,0), tP=d.reduce((a,[c,v])=>a+v*lift*(1-split),0);
   return `${showcaseHeader(8,'Backend 分成')}
@@ -3601,9 +3665,9 @@ function renderP2CostAI(){
     const pos=Math.max(0,Math.min(100,(cur-lo)/(hi-lo)*100));
     const judge=cur>mid*1.2?['偏高','#c05621']:cur<mid*0.8?['偏低','#3182ce']:['合理','#276749'];
     return `<div style="margin-bottom:18px">
-      <div style="display:flex;justify-content:space-between;font-size:13px"><span>${lab}</span><span style="font-weight:700;color:${judge[1]}">¥${fmt(cur)} · ${judge[0]}</span></div>
+      <div style="display:flex;justify-content:space-between;font-size:13px"><span>${lab}</span><span style="font-weight:700;color:${judge[1]}">${cm(cur)} · ${judge[0]}</span></div>
       <div class="range-anchor"><div class="ra-track"></div><div class="ra-marker" style="left:${pos}%"></div>
-        <div class="ra-lab" style="left:2%">低 ¥${fmt(lo)}</div><div class="ra-lab" style="left:50%">中位 ¥${fmt(mid)}</div><div class="ra-lab" style="left:96%">高 ¥${fmt(hi)}</div></div>
+        <div class="ra-lab" style="left:2%">低 ${cm(lo)}</div><div class="ra-lab" style="left:50%">中位 ${cm(mid)}</div><div class="ra-lab" style="left:96%">高 ${cm(hi)}</div></div>
     </div>`;
   }).join('');
   const suppliers=[['北京·Local Ace Live','场地+基础设备',5,'¥56,000'],['示例 Backline 租赁','Backline 全套',4.5,'¥16,000'],['连锁酒店(团体价)','艺人/随队住宿',4,'¥780/间·晚'],['示例安保服务','演出安保',4.5,'¥360/人']];
@@ -3954,10 +4018,10 @@ function renderPnlRail(){
     <div style="font-weight:800;color:#2d3a8c;margin-bottom:8px;font-size:14px">🚌 巡演实时 P&L<span style="font-size:11px;color:#888;font-weight:400"> · ${state.shows.length} 场</span></div>
     ${row('总票房 Gross', tour.totGross)}
     ${row('净票房 Net', tour.totNet)}
-    ${row('主办成本（含保底·差旅）', tourCost)}
+    ${row('主办成本（含保底）', tourCost)}
     <div style="display:flex;justify-content:space-between;padding:1px 0 4px;font-size:11px;color:#999"><span>　其中行程日差旅成本（落地/移动等）</span><span>${fmtY2(tour.extraCost)}</span></div>
     ${row('总净利润 <span style="font-size:10px;color:#aaa;font-weight:400">主办</span>', tour.totProfit, tour.totProfit>=0?'#2d3a8c':'#c53030', true)}
-    <div style="display:flex;justify-content:space-between;padding:4px 0;font-size:13px"><span style="color:#666">艺人占比</span><span style="font-weight:700;color:#7c5cff">${fmtP(_tourArtistPct)}</span></div>
+    <div style="display:flex;justify-content:space-between;padding:4px 0;font-size:13px"><span style="color:#666">艺人占比<span class="tooltip-wrap"><span class="info-icon">ⓘ</span><span class="tip" style="white-space:normal;min-width:250px">= (保底 + 艺人VIP分成) ÷ 净潜力（扣演出成本后的可分配额）。注意：「建议保底」按净票房×30% 估算，分母是净票房；此处分母是净潜力（更小），故比例通常高于 30%。本数据不含分红。</span></span></span><span style="font-weight:700;color:#7c5cff">${fmtP(_tourArtistPct)}</span></div>
     <div style="display:flex;justify-content:space-between;padding:4px 0;font-size:13px"><span style="color:#666">主办占比</span><span style="font-weight:700;color:${tour.totPct()>=0?'#38a169':'#c53030'}">${fmtP(tour.totPct())}</span></div>
   </div>`;
   // ── 本场实时 P&L（仅当上下文 = 演出场时显示；落地/移动日等隐藏）──
@@ -3975,7 +4039,7 @@ function renderPnlRail(){
         ${row('净票房 Net', r.net)}
         ${row('主办成本（含保底）', showCost)}
         ${row('本场净利润 <span style="font-size:10px;color:#aaa;font-weight:400">主办</span>', r.promoterProfit, r.promoterProfit>=0?'#2d3a8c':'#c53030', true)}
-        <div style="display:flex;justify-content:space-between;padding:4px 0;font-size:13px"><span style="color:#666">艺人占比</span><span style="font-weight:700;color:#7c5cff">${fmtP(r.netPotential>0?(r.guaPerShow+(r.artistVIPIncome||0))/r.netPotential*100:0)}</span></div>
+        <div style="display:flex;justify-content:space-between;padding:4px 0;font-size:13px"><span style="color:#666">艺人占比<span class="tooltip-wrap"><span class="info-icon">ⓘ</span><span class="tip" style="white-space:normal;min-width:250px">= (保底 + 艺人VIP分成) ÷ 净潜力（扣演出成本后的可分配额）。注意：「建议保底」按净票房×30% 估算，分母是净票房；此处分母是净潜力（更小），故比例通常高于 30%。本数据不含分红。</span></span></span><span style="font-weight:700;color:#7c5cff">${fmtP(r.netPotential>0?(r.guaPerShow+(r.artistVIPIncome||0))/r.netPotential*100:0)}</span></div>
         <div style="display:flex;justify-content:space-between;padding:4px 0;font-size:13px"><span style="color:#666">主办占比</span><span style="font-weight:700;color:${r.promoterPct>=0?'#38a169':'#c53030'}">${fmtP(r.promoterPct)}</span></div>
       </div>`;
     }
@@ -4012,15 +4076,15 @@ function renderFeeAnchor(){
   <div class="fa-card">
     <div class="fa-title">🎯 Artist Guarantee 倒推（巡演）</div>
     <div class="fa-sub" style="font-weight:700;color:#2d3a8c">建议保底（目标ROI ${state.targetROI}%）</div>
-    <div class="fa-big" style="color:${pos?'#2d3a8c':'#e53e3e'}">¥${fmt(Math.max(0,maxTotalFee))}</div>
-    <div class="fa-sub">≈ ${cur2sym()}${fmt(Math.max(0,maxTotalFee/cur2rate()))} ${state.secondCur==='EUR'?'EUR':'USD'} · 单场均 ¥${fmt(Math.max(0,maxPerShow))}</div>
+    <div class="fa-big" style="color:${pos?'#2d3a8c':'#e53e3e'}">${cm(Math.max(0,maxTotalFee))}</div>
+    <div class="fa-sub">≈ ${cur2sym()}${fmt(Math.max(0,maxTotalFee/cur2rate()))} ${state.secondCur==='EUR'?'EUR':'USD'} · 单场均 ${cm(Math.max(0,maxPerShow))}</div>
     <div class="fa-bar"><i style="width:${usedPct}%;background:${barColor}"></i></div>
-    <div class="fa-row"><span>当前已设保底合计</span><b style="color:${overRed?'#c53030':'inherit'}">¥${fmt(curFee)}</b></div>
-    <div class="fa-row"><span>距建议保底</span><b style="color:${within?'#38a169':'#e53e3e'}">${within?'还可加 ':'已超 '}¥${fmt(Math.abs(headroom))}</b></div>
-    <div class="fa-row" style="background:#fff5f5;margin:4px -6px 0;padding:6px"><span style="color:#c53030;font-weight:700">🔴 盈亏平衡红线</span><b style="color:#c53030">¥${fmt(Math.max(0,redline))}</b></div>
+    <div class="fa-row"><span>当前已设保底合计</span><b style="color:${overRed?'#c53030':'inherit'}">${cm(curFee)}</b></div>
+    <div class="fa-row"><span>距建议保底</span><b style="color:${within?'#38a169':'#e53e3e'}">${within?'还可加 ':'已超 '}${cm(Math.abs(headroom))}</b></div>
+    <div class="fa-row" style="background:#fff5f5;margin:4px -6px 0;padding:6px"><span style="color:#c53030;font-weight:700">🔴 盈亏平衡红线</span><b style="color:#c53030">${cm(Math.max(0,redline))}</b></div>
     ${overRed?'<div style="margin-top:4px;color:#c53030;font-size:11px;font-weight:700">⛔ 已设保底超过红线，主办将亏损！</div>':''}
-    <div class="fa-row" style="border-top:1px solid #e8eaf0;margin-top:6px;padding-top:8px"><span>净票房</span><b>¥${fmt(tour.totNet)}</b></div>
-    <div class="fa-row"><span>主办成本</span><b>¥${fmt(tour.totPromoterCost)}</b></div>
+    <div class="fa-row" style="border-top:1px solid #e8eaf0;margin-top:6px;padding-top:8px"><span>净票房</span><b>${cm(tour.totNet)}</b></div>
+    <div class="fa-row"><span>主办成本</span><b>${cm(tour.totPromoterCost)}</b></div>
     <div class="fa-row"><span>目标 ROI</span><b>${state.targetROI}%</b></div>
     ${pos?'':'<div style="margin-top:8px;color:#e53e3e;font-size:11px;font-weight:600">⚠️ 当前上座率/成本下，即使不付保底也达不到目标 ROI。</div>'}
   </div>`);
@@ -4439,7 +4503,7 @@ function renderAsmTransRows(){
         <option value="daily" ${row.service==='daily'?'selected':''}>全天日租</option>
       </select>
       <input type="number" min="1" max="20" value="${row.qty||1}" style="width:52px;font-size:12px;padding:5px;border:1px solid #dde1ef;border-radius:6px" onchange="onAsmTransRow(${i},'qty',+this.value)" title="数量(辆/次)">
-      <span style="font-size:11px;color:#888;min-width:64px;text-align:right">¥${(CITY_REF.transport[row.type][row.service]*(row.qty||1)).toLocaleString()}</span>
+      <span style="font-size:11px;color:#888;min-width:64px;text-align:right">${cm(CITY_REF.transport[row.type][row.service]*(row.qty||1))}</span>
       ${asmTransRows.length>1?`<button class="remove-btn" type="button" onclick="removeAsmTransRow(${i})">×</button>`:''}
     </div>`).join('');
 }
@@ -4741,7 +4805,7 @@ function closeModal(id_){id(id_).classList.remove('open');}
 function dmGua(sh){
   const g=(sh._guarantee!==undefined?sh._guarantee:state.guaranteeAmt)||0;
   const cur=sh.guaranteeCur||state.guaranteeCur||'CNY';
-  return (cur==='USD'?'$':'¥')+fmt(g);
+  return cm(g);
 }
 function dmDealType(){
   const o=state.offer||{};
@@ -4793,7 +4857,7 @@ function buildDealMemoHTML(){
     const blocks=state.shows.map(sh=>{
       const ts=(sh.tiers||[]).filter(t=>t&&(t.name||t.price));
       if(!ts.length) return '';
-      const li=ts.map(t=>`<span class="dm-pill">${esc(t.name||'票档')} ¥${fmt(t.price||0)}</span>`).join(' ');
+      const li=ts.map(t=>`<span class="dm-pill">${esc(t.name||'票档')} ${cm(t.price||0)}</span>`).join(' ');
       return `<div class="dm-price-row"><span class="dm-city">${esc(sh.city||'—')}</span> ${li}</div>`;
     }).filter(Boolean).join('');
     html+=`<div class="dm-h">票价档位 Ticket Prices</div><div>${blocks||'<span class="dm-muted">—</span>'}</div>`;
@@ -4804,13 +4868,25 @@ function buildDealMemoHTML(){
     let table;
     if(split){
       let tg=0,tb=0,tw=0;
-      const rows=state.shows.map(sh=>{ const g=Math.round(computeOffer(sh).guaCNY||0); const bn=dmShowBonus(sh); const wk=g+bn; tg+=g;tb+=bn;tw+=wk; return `<tr><td>${esc(sh.city||'—')}</td><td>${sh.date||'—'}</td><td style="text-align:right">¥${fmt(g)}</td><td style="text-align:right">¥${fmt(bn)}</td><td style="text-align:right">¥${fmt(wk)}</td></tr>`; }).join('');
-      table=`<table class="dm-tbl"><thead><tr><th>城市</th><th>日期</th><th style="text-align:right">保底 Guarantee</th><th style="text-align:right">潜在奖金 Bonus</th><th style="text-align:right">落袋 Walk-out</th></tr></thead><tbody>${rows}</tbody><tfoot><tr style="font-weight:700"><td colspan="2">合计 Total</td><td style="text-align:right">¥${fmt(tg)}</td><td style="text-align:right">¥${fmt(tb)}</td><td style="text-align:right">¥${fmt(tw)}</td></tr></tfoot></table><div class="dm-muted" style="font-size:11px;margin-top:4px">潜在奖金 Bonus = 满场时超过起征点部分的艺人分成上限；落袋 Walk-out = 保底 + 潜在奖金（税前）。</div>`;
+      const rows=state.shows.map(sh=>{ const g=Math.round(computeOffer(sh).guaCNY||0); const bn=dmShowBonus(sh); const wk=g+bn; tg+=g;tb+=bn;tw+=wk; return `<tr><td>${esc(sh.city||'—')}</td><td>${sh.date||'—'}</td><td style="text-align:right">${cm(g)}</td><td style="text-align:right">${cm(bn)}</td><td style="text-align:right">${cm(wk)}</td></tr>`; }).join('');
+      table=`<table class="dm-tbl"><thead><tr><th>城市</th><th>日期</th><th style="text-align:right">保底 Guarantee</th><th style="text-align:right">潜在奖金 Bonus</th><th style="text-align:right">落袋 Walk-out</th></tr></thead><tbody>${rows}</tbody><tfoot><tr style="font-weight:700"><td colspan="2">合计 Total</td><td style="text-align:right">${cm(tg)}</td><td style="text-align:right">${cm(tb)}</td><td style="text-align:right">${cm(tw)}</td></tr></tfoot></table><div class="dm-muted" style="font-size:11px;margin-top:4px">潜在奖金 Bonus = 满场时超过起征点部分的艺人分成上限；落袋 Walk-out = 保底 + 潜在奖金（税前）。</div>`;
     } else {
       const guaRows=state.shows.map(sh=>`<tr><td>${esc(sh.city||'—')}</td><td>${sh.date||'—'}</td><td style="text-align:right">${dmGua(sh)}</td></tr>`).join('');
       table=`<table class="dm-tbl"><thead><tr><th>城市</th><th>日期</th><th style="text-align:right">保底 Guarantee</th></tr></thead><tbody>${guaRows}</tbody></table>`;
     }
     html+=`<div class="dm-h">Deal Structure 交易结构</div><div class="dm-deal">${dmDealType()}</div>${table}<table class="dm-kv"><tbody><tr><th>预扣税 WHT</th><td>${state.whtRate||0}%（自艺人款代扣，最终支付 = 保底 ×(1−${state.whtRate||0}%)）</td></tr><tr><th>付款计划 Payment</th><td>${esc(state.paymentPlan||'—')}</td></tr><tr><th>汇率 FX</th><td>¥${er} / USD</td></tr></tbody></table>`;
+  }
+  if(_dmAll || want('shows')){
+    const er3=state.exchangeRate||7.28; const symf=c=>c==='USD'?'$':c==='EUR'?'€':'¥';
+    const tI=[];
+    state.shows.forEach(sh=>tI.push({k:'show',d:sh.date||'',type:'show',city:sh.city,venue:sh.venue,cap:sh.capacity,gua:(sh._guarantee!==undefined?sh._guarantee:state.guaranteeAmt)||0,gcur:sh.guaranteeCur||state.guaranteeCur||'CNY'}));
+    (state.logiDays||[]).forEach(ld=>tI.push({k:'logi',d:ld.date||'',type:ld.type,city:ld.city}));
+    tI.sort((a,b)=>(a.d||'').localeCompare(b.d||''));
+    const tr=tI.map(it=>{const m=dayTypeMeta(it.type);const dow=it.d?getWeekday(it.d):'';
+      if(it.k==='show') return `<tr><td>${it.d||'—'}${dow}</td><td>${m.zh}</td><td>${esc(it.city||'—')}</td><td>${esc(it.venue||'—')}</td><td style="text-align:right">${fmt(it.cap||0)}</td><td style="text-align:right">${cm(it.gua)}</td></tr>`;
+      return `<tr style="color:#9aa0b4"><td>${it.d||'—'}${dow}</td><td>${m.zh}</td><td>${esc(it.city||'—')}</td><td colspan="2">行程日（非演出）</td><td style="text-align:right">—</td></tr>`;}).join('');
+    const tCNY=state.shows.reduce((a,sh)=>{const g=(sh._guarantee!==undefined?sh._guarantee:state.guaranteeAmt)||0;const c=sh.guaranteeCur||state.guaranteeCur||'CNY';return a+(c==='USD'?g*er3:c==='EUR'?g*(state.eurRate||7.9):g);},0);
+    html+=`<div class="dm-h">巡演全程 Tour Grid</div><table class="dm-tbl"><thead><tr><th>日期</th><th>日类型</th><th>城市</th><th>场馆</th><th style="text-align:right">容量</th><th style="text-align:right">保底</th></tr></thead><tbody>${tr}</tbody><tfoot><tr style="font-weight:700"><td colspan="5">Total Guarantee</td><td style="text-align:right">${cm(Math.round(tCNY))}</td></tr></tfoot></table>`;
   }
   if(note){ html+=`<div class="dm-h">备注 Notes</div><div class="dm-note">${esc(note)}</div>`; }
   const today=new Date().toISOString().slice(0,10);
@@ -4884,7 +4960,7 @@ function dmSeed(){
       {name:'Boss',role:'老板/决策',scores:{live:3,reach:3,quality:3,china:3,craft:4,momentum:4},venue:DM_VENUES[1],note:'整体可做，先中型试水控制风险。',comp:'',submitted:false}
     ],
     // 录用门槛（IELTS 式最低分线）：0=不设要求；示例要求粉丝质量≥3、本地契合≥3.5
-    thresholds:{live:0,reach:0,quality:3,china:3.5,craft:0,momentum:0}
+    thresholds:{live:0,reach:0,quality:0,china:0,craft:0,momentum:0}
   };
 }
 function showForecast(){
@@ -4986,34 +5062,22 @@ function dmScorecardHTML(){
   const A=dmAgg(); const g=dmGate();
   const total=A.dims.reduce((a,d)=>a+d.avg,0);
   const overall=A.overall; const band=dmRound05(overall);
-  const rows=A.dims.map(d=>{
-    const c=g.checks.find(x=>x.key===d.key);
-    const cell = c.gated ? (c.pass?'<span style="color:#16a34a;font-weight:800">✓ 达标</span>':'<span style="color:#dc2626;font-weight:800">✗ 未达</span>') : '<span style="color:#cbd0dc">—</span>';
-    return `<tr style="border-bottom:1px solid #f0f1f6">
+  const rows=A.dims.map(d=>`<tr style="border-bottom:1px solid #f0f1f6">
       <td style="padding:7px 6px;font-weight:600">${d.name}</td>
       <td style="padding:7px 6px;text-align:center;font-weight:800;color:#4f46e5;font-size:15px">${d.avg.toFixed(1)}</td>
-      <td style="padding:7px 6px;text-align:center"><input type="number" min="0" max="5" step="0.5" value="${(+DIAMOND.thresholds[d.key]||0)||''}" placeholder="—" onchange="dmSetThreshold('${d.key}',this.value)" style="width:54px;text-align:center;border:1px solid #d8dbe8;border-radius:6px;padding:4px"></td>
-      <td style="padding:7px 6px;text-align:center">${cell}</td></tr>`;
-  }).join('');
-  const gateBadge = !g.hasGate
-    ? '<span style="color:#9ca3af;font-size:12px">未设录用门槛——在上表「最低分线」列填入要求（如某维度 ≥3）</span>'
-    : g.pass
-      ? `<span style="background:#dcfce7;color:#166534;font-weight:800;padding:5px 14px;border-radius:20px">✅ 通过录用线 · ${g.gated.length} 项门槛全部达标</span>`
-      : `<span style="background:#fee2e2;color:#991b1b;font-weight:800;padding:5px 14px;border-radius:20px">⛔ 未通过录用线 · ${g.fails.length} 项未达标：${g.fails.map(f=>`${f.name} ${f.avg.toFixed(1)}&lt;${f.min}`).join('、')}</span>`;
+      <td style="padding:7px 6px;text-align:center;color:#a5b4fc;letter-spacing:2px">${'●'.repeat(Math.round(d.avg))}${'○'.repeat(5-Math.round(d.avg))}</td></tr>`).join('');
   return `<table style="width:100%;border-collapse:collapse;font-size:13px">
     <thead><tr style="border-bottom:2px solid #e6e8f2;color:#6b7280;font-size:11.5px">
       <th style="padding:6px;text-align:left">维度（aspect）</th>
       <th style="padding:6px;text-align:center">团队均分 band</th>
-      <th style="padding:6px;text-align:center">最低分线<br><span style="font-weight:400">可设·0–5</span></th>
-      <th style="padding:6px;text-align:center">是否达标</th></tr></thead>
+      <th style="padding:6px;text-align:center">强弱</th></tr></thead>
     <tbody>${rows}</tbody>
     <tfoot><tr style="border-top:2px solid #e6e8f2;font-weight:800">
       <td style="padding:9px 6px">总分 / 总平均</td>
       <td style="padding:9px 6px;text-align:center;color:#7c3aed">${total.toFixed(1)}<span style="font-weight:400;color:#9ca3af;font-size:11px"> /30</span></td>
-      <td colspan="2" style="padding:9px 6px;text-align:center">Overall Band <span style="color:#4f46e5;font-size:17px">${overall.toFixed(2)}</span> <span style="color:#9ca3af">→ ${band.toFixed(1)}</span></td></tr></tfoot>
+      <td style="padding:9px 6px;text-align:center">Overall <span style="color:#4f46e5;font-size:17px">${overall.toFixed(2)}</span><span style="color:#9ca3af"> → ${band.toFixed(1)}</span></td></tr></tfoot>
   </table>
-  <div style="margin-top:12px;text-align:center">${gateBadge}</div>
-  <div style="margin-top:8px;font-size:11px;color:#9ca3af;text-align:center">仿 IELTS：每个维度一个 band（团队均分），总平均四舍五入到 0.5 为 Overall Band；可对任意维度设最低分线，全部达标才"通过录用线"。</div>`;
+  <div style="margin-top:8px;font-size:11px;color:#9ca3af;text-align:center">仿 IELTS：每个维度一个 band（团队均分），总平均四舍五入到 0.5 为 Overall Band。理想 touring artist 不必六维均衡——<b>本地真实 draw（hard-ticket 号召力）</b>才是主导预测项，不设硬性门槛以免「一言堂」。</div>`;
 }
 // ── 自动结论 ──
 function dmConclusionHTML(){
@@ -5039,7 +5103,7 @@ function dmVerdictHTML(){
   const A=dmAgg(); const b=dmBand(A.overall);
   return `<div class="dm-verdict"><div style="display:flex;align-items:baseline;flex-wrap:wrap">
     <span class="score-big">${A.overall.toFixed(2)}</span><span style="font-size:18px;color:#9ca3af;font-weight:700">/5</span>
-    <span class="band" style="background:${b.bg};color:${b.col}">${b.label}</span></div>
+    <span class="band" style="background:${b.bg};color:${b.col}">${b.label}</span><span class="band" style="background:#eef2ff;color:#4f46e5;margin-left:6px">倾向 ${dmVerdictLabel(A.overall)}</span></div>
     ${dmConclusionHTML()}</div>`;
 }
 function dmDimbarsHTML(){
@@ -5113,10 +5177,22 @@ function dmRefHTML(){
    +`<div style="color:#888">完整框架与引用底稿见：<b>工作进度/产品文档/艺人售票潜力评估_钻石模型_框架与引用.md</b>。K-pop 造星体系的横切启示：粉丝忠诚（维度3）与造势时机（维度6）可被运营"做出来"，重要性不亚于原始声量。</div>`;
 }
 // ── 交互 ──
+function dmVerdictLabel(v){ return v<2.5?'保守':v<3.0?'中性偏保守':v<=3.4?'中性':v<=3.9?'中性偏乐观':'乐观'; }
+function dmEntryCardHTML(){
+  let done=false; try{ done=(typeof DM_INIT!=='undefined' && DM_INIT && DIAMOND && DIAMOND.phase==='results' && dmAgg().n>=2); }catch(e){}
+  if(!done){
+    return `<div style="margin:0 0 16px;padding:20px;background:linear-gradient(120deg,#f8f9ff 0%,#eef2ff 100%);border:1.5px solid #d8dbe8;border-radius:10px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px"><div style="flex:1;min-width:240px"><div style="font-size:15px;font-weight:800;color:#4f46e5;margin-bottom:6px;display:flex;align-items:center;gap:6px">💎 艺人售票潜力评估 (Diamond Model)</div><div style="font-size:13px;color:#555;line-height:1.6">在确认最终 Offer 前，当前设定的预估上座率是否稳妥？<br>结合 <b>6 维 MECE 模型</b>（过往战绩、铁粉浓度、本地数据等），一键分发给团队进行无偏差打分，评估项目风险。</div></div><button class="btn btn-diamond" style="padding:10px 22px;font-size:13px;box-shadow:0 4px 14px rgba(79,70,229,0.25)" onclick="showForecast()">开始团队多维评估 ✨</button></div>`;
+  }
+  const A=dmAgg(); const myAvg=DM_DIMS.reduce((a,d)=>a+(DIAMOND.me.scores[d.key]||3),0)/DM_DIMS.length;
+  return `<div style="margin:0 0 16px;padding:18px;background:linear-gradient(120deg,#f8f9ff 0%,#eef2ff 100%);border:1.5px solid #c7d2fe;border-radius:10px"><div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px"><div><div style="font-size:15px;font-weight:800;color:#4f46e5">💎 艺人售票潜力评估 · 已完成（${A.n} 人）</div><div style="font-size:13px;color:#555;margin-top:5px">团队综合 <b style="color:#4f46e5;font-size:17px">${A.overall.toFixed(2)}</b>/5 · 倾向 <b style="color:#4f46e5">${dmVerdictLabel(A.overall)}</b> &nbsp;|&nbsp; 我的均分 <b>${myAvg.toFixed(1)}</b></div></div><button class="btn btn-diamond" style="padding:9px 20px;font-size:13px" onclick="showForecast()">查看评估 →</button></div><div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:10px;font-size:12px;color:#555;border-top:1px dashed #d8dbe8;padding-top:10px">${A.dims.map(d=>`<span>${d.name} <b style="color:#4f46e5">${d.avg.toFixed(1)}</b></span>`).join('')}</div></div>`;
+}
 function dmScore(key,val){
   DIAMOND.me.scores[key]=+val;
   const vl=id('dm-val-'+key); if(vl) vl.textContent=val;
   const r=id('dm-radar-host'); if(r) r.innerHTML=dmRadarSVG({meOnly:true});
+  const _ma=DM_DIMS.reduce((a,d)=>a+(DIAMOND.me.scores[d.key]||3),0)/DM_DIMS.length;
+  const mv=id('dm-myavg'); if(mv) mv.textContent=_ma.toFixed(1);
+  const vv=id('dm-myverdict'); if(vv) vv.textContent=dmVerdictLabel(_ma);
 }
 function dmField(f,val){ DIAMOND.me[f]=val; }
 function dmDistribute(){
@@ -5140,13 +5216,15 @@ function dmHeader(btns){
 }
 function dmEvaluateEditor(){
   const m=DIAMOND.me;
+  const _myAvg=DM_DIMS.reduce((a,d)=>a+(m.scores[d.key]||3),0)/DM_DIMS.length;
   const sliders=DM_DIMS.map(d=>`<div class="dm-score-row">
     <div class="lbl">${d.name}<small>${d.short}</small></div>
-    <input type="range" min="1" max="5" step="1" value="${m.scores[d.key]||3}" oninput="dmScore('${d.key}',this.value)">
+    <div style="width:100%"><div style="display:flex;justify-content:space-between;font-size:9px;color:#b8bcc8;margin-bottom:1px;padding:0 1px"><span>保守</span><span>中性</span><span>乐观</span></div><input type="range" min="1" max="5" step="1" value="${m.scores[d.key]||3}" oninput="dmScore('${d.key}',this.value)" style="width:100%;display:block"></div>
     <div class="val" id="dm-val-${d.key}">${m.scores[d.key]||3}</div>
   </div>`).join('');
   const venueOpts=DM_VENUES.map(v=>`<option ${v===m.venue?'selected':''}>${v}</option>`).join('');
-  return `<div style="display:flex;gap:10px">
+  return `<div style="display:flex;align-items:center;gap:10px;background:#ecfdf5;border:1px solid #a7f3d0;border-radius:9px;padding:9px 13px;margin-bottom:12px"><span style="font-size:12px;color:#047857">我的均分</span><b id="dm-myavg" style="font-size:20px;color:#059669">${_myAvg.toFixed(1)}</b><span style="font-size:12px;color:#047857">/5 · 倾向</span><b id="dm-myverdict" style="font-size:15px;color:#059669">${dmVerdictLabel(_myAvg)}</b></div>
+    <div style="display:flex;gap:10px">
       <div class="dm-field" style="flex:1"><label>你是</label><input type="text" value="${esc(m.name||'')}" oninput="dmField('name',this.value)" placeholder="姓名/昵称"></div>
       <div class="dm-field" style="flex:1"><label>角色（仅标签，不影响权重）</label><input type="text" value="${esc(m.role||'')}" oninput="dmField('role',this.value)" placeholder="如 主理人 / 市场"></div>
     </div>
@@ -5173,7 +5251,7 @@ function renderDmEvaluate(){
         <h3>✍️ 我的评分</h3>
         ${dmEvaluateEditor()}
         <button class="dm-btn" style="width:100%;margin-top:14px;font-size:14px;padding:13px" onclick="dmDistribute()">📤 分发给团队（${DIAMOND.team.length} 人）收集意见 →</button>
-        <div style="font-size:11.5px;color:#999;text-align:center;margin-top:7px">演示：点击后将模拟把评估表发给团队，并收集他们的反馈。</div>
+        <div style="font-size:11.5px;color:#999;text-align:center;margin-top:7px">点击后把评估表发给团队，收集每个人的独立打分。</div>
       </div>
     </div>
     <div class="dm-card">
@@ -5196,7 +5274,7 @@ function renderDmCollecting(){
     <div class="dm-card" style="text-align:center">
       <div style="font-size:40px;margin-bottom:6px">📤</div>
       <h3 style="justify-content:center">评估表已分发给团队</h3>
-      <div class="notice notice-blue" style="text-align:left">演示分享链接：<b>demo.live/diamond/示例艺人A</b> · 已发送给 ${total} 位成员。团队成员各自独立打分（人人等权），反馈实时回流到这里。</div>
+      <div class="notice notice-blue" style="text-align:left"><b>${esc(DIAMOND.artist)}</b> 评分邀请已派发给 ${total} 位团队成员（人人等权），各自独立打分，反馈实时回流到这里。</div>
       <div style="background:#eef0fb;border-radius:10px;height:12px;overflow:hidden;margin:14px 0 6px"><div style="height:100%;background:linear-gradient(90deg,#7c3aed,#4f46e5);width:${(done/total*100).toFixed(0)}%;transition:width .4s"></div></div>
       <div style="font-size:13px;font-weight:800;color:#4f46e5;margin-bottom:14px">已回收 ${done}/${total}</div>
       <div style="text-align:left;max-width:420px;margin:0 auto">${list}</div>
@@ -5212,7 +5290,7 @@ function renderDmResults(){
     <div class="dm-intro"><b>第 3 步 · 团队汇总。</b>${esc(DIAMOND.team.length)} 位团队成员 + 你，已全部完成评估。下方是综合结论、你与团队的差异、以及每个人的逐条意见。评估对象：<b>${esc(DIAMOND.artist)}</b>。</div>
     <div id="dm-verdict-host">${dmVerdictHTML()}</div>
     <div class="dm-card">
-      <h3>📊 团队成绩单（IELTS 式）· 录用门槛</h3>
+      <h3>📊 团队成绩单（IELTS 式）</h3>
       <div id="dm-scorecard-host">${dmScorecardHTML()}</div>
     </div>
     <div class="dm-grid">
@@ -5267,7 +5345,7 @@ function downloadReportHTML(){
   recompute();
   const root=buildPdfRoot();
   let css=''; document.querySelectorAll('style').forEach(st=>{ css+=st.textContent+'\n'; });
-  const html='<!doctype html><html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>'+esc(state.projectName||'报告')+'</title><style>'+css+'\nbody{background:#fff;margin:0;padding:18px;font-family:-apple-system,BlinkMacSystemFont,\'PingFang SC\',\'Microsoft YaHei\',\'Noto Sans CJK SC\',sans-serif}#pdf-root{width:auto;max-width:1040px;margin:0 auto;padding:0}@media print{@page{margin:12mm 8mm}}</style></head><body>'+root.outerHTML+'</body></html>';
+  const html='<!doctype html><html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>'+esc(state.projectName||'报告')+'</title><style>'+css+'\nbody{background:#fff;margin:0;padding:18px}#pdf-root,#pdf-root *{font-family:\'PingFang SC\',\'Hiragino Sans GB\',\'Microsoft YaHei\',\'Noto Sans CJK SC\',\'Noto Sans SC\',\'WenQuanYi Micro Hei\',-apple-system,BlinkMacSystemFont,sans-serif !important}#pdf-root{width:auto;max-width:1040px;margin:0 auto;padding:0}@media print{@page{margin:12mm 8mm}}</style></head><body>'+root.outerHTML+'</body></html>';
   const blob=new Blob([html],{type:'text/html;charset=utf-8'});
   const a=document.createElement('a'); a.href=URL.createObjectURL(blob);
   a.download=(state.projectName||'report').replace(/[^\w\u4e00-\u9fff-]+/g,'_')+'_报告.html'; a.click();
@@ -5290,7 +5368,7 @@ if(typeof window!=='undefined' && !window.__pdfAfterPrint){
 // [v3.8.67] 整页 PDF 组装：所有 section 展开、各日/各城平铺、日历定位到巡演月份、Deal Memo 含潜在奖金/落袋。
 function buildPdfRoot(){
   const root=document.createElement('div'); root.id='pdf-root';
-  root.style.cssText='width:1040px;background:#fff;color:#1a1a2e;padding:24px;box-sizing:border-box;font-family:-apple-system,BlinkMacSystemFont,\'PingFang SC\',\'Microsoft YaHei\',\'Noto Sans CJK SC\',sans-serif';
+  root.style.cssText='width:1040px;background:#fff;color:#1a1a2e;padding:24px;box-sizing:border-box;font-family:\'PingFang SC\',\'Hiragino Sans GB\',\'Microsoft YaHei\',\'Noto Sans CJK SC\',\'Noto Sans SC\',\'WenQuanYi Micro Hei\',-apple-system,BlinkMacSystemFont,sans-serif';
   const _today=new Date().toISOString().slice(0,10);
   const _artLine=state.artist?('<div style="margin-top:22px;font-size:16px;color:#555">'+esc(state.artist)+' · '+(state.shows.length)+(lang==='zh'?' 场':' shows')+'</div>'):'';
   root.innerHTML='<div style="min-height:960px;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;break-after:page;page-break-after:always"><div style="width:64px;height:4px;background:#2d3a8c;border-radius:2px;margin-bottom:26px"></div><div style="font-size:34px;font-weight:800;color:#2d3a8c;line-height:1.25;max-width:80%">'+esc(state.projectName||'P&L')+'</div><div style="font-size:17px;color:#8a90a6;margin-top:14px;letter-spacing:.5px">Profit Calculator</div><div style="font-size:14px;color:#aeb3c4;margin-top:6px">'+_today+'</div>'+_artLine+'</div>';
@@ -5315,7 +5393,7 @@ function buildPdfRoot(){
   (state.logiDays||[]).forEach((ld,i)=>items.push({k:'logi',i,d:ld.date||''}));
   items.sort((a,b)=>(a.d||'').localeCompare(b.d||''));
   items.forEach(it=>{
-    if(it.k==='logi'){ const ld=state.logiDays[it.i]; s4+='<div class="card" style="margin-bottom:10px">'+renderLogiCard(ld,it.i)+'</div>'; }
+    if(it.k==='logi'){ const ld=state.logiDays[it.i]; s4+=renderLogiCard(ld,it.i); }
     else { const sh=state.shows[it.i]; const r=calcShow(sh); const groups=activeCostGroups().map(g=>renderCostGroup(g,sh,r,it.i)).join(''); s4+='<div class="card" style="margin-bottom:10px;border-left:5px solid '+dayTypeMeta('show').color+'">'+dayHdr(sh.date,'show','演出日：'+esc(sh.city||'')+(sh.venue?' · '+esc(sh.venue):''))+'<div style="font-size:15px;font-weight:800;color:#2d3a8c;margin:6px 0">运营成本</div>'+groups+renderArtistFee(sh,it.i)+'</div>'; }
   });
   root.appendChild(wrap(s4,true));
@@ -5332,7 +5410,7 @@ function buildPdfRoot(){
   // 艺人售票潜力评估（Diamond）：未评估则显示未评估，已评估则平铺结果
   let _diaDone=false; try{ _diaDone=(typeof DM_INIT!=='undefined' && DM_INIT && DIAMOND && DIAMOND.phase==='results' && dmAgg().n>=2); }catch(e){}
   let _dia='<div class="section-header"><div class="section-num">\u2605</div><div class="section-title">艺人售票潜力评估 Diamond Model</div></div>';
-  if(_diaDone){ let _b=''; try{ _b=dmVerdictHTML()+dmDimbarsHTML(); }catch(e){ _b=''; } _dia+='<div class="card">'+_b+'</div>'; }
+  if(_diaDone){ let _b=''; try{ _b=dmVerdictHTML()+'<div style="margin-top:14px;font-weight:800;color:#2d3a8c">\uD83D\uDCCA 团队成绩单</div>'+dmScorecardHTML()+'<div style="margin-top:14px;font-weight:800;color:#2d3a8c">各维度团队平均 · 分歧度</div>'+dmDimbarsHTML(); }catch(e){ _b=''; } _dia+='<div class="card">'+_b+'</div>'; }
   else { _dia+='<div class="card"><div style="text-align:center;padding:28px;color:#9aa0b4;font-size:15px">未评估 Not evaluated</div></div>'; }
   root.appendChild(wrap(_dia,true));
   // Deal Memo（全选）
@@ -5386,7 +5464,7 @@ function startNew(){
 }
 function loadDemo(){
   isDemo=true;
-  state=getDemoState();
+  state=getDemoState(); migrateGuaToCNY(state);
   (state.shows||[]).forEach(sh=>(sh.tiers||[]).forEach(t=>{ if(t.sellable===undefined) t.sellable=Math.round((t.capCount||0)*(t.occ||85)/100); }));
   showApp();
   renderApp();
@@ -5411,7 +5489,7 @@ function handleFileLoad(e){
     try{
       const data=JSON.parse(ev.target.result);
       isDemo=false;
-      state=Object.assign(defaultState(),data);
+      state=Object.assign(defaultState(),data); migrateGuaToCNY(state);
       showApp(); renderApp();
     }catch(err){alert(translate('文件格式错误，请上传有效的 .json 文件。'));}
   };
@@ -5440,7 +5518,7 @@ const TOUR_STEPS = [
   {
     selector: null,
     title: '欢迎使用 Profit Calculator · 演出预算模拟器',
-    body: '这是给演出主办方的 Offer 阶段损益沙盘。下面用「TS 2026 China Tour」的真实数据，带你从新建项目走到生成 Deal Memo。',
+    body: '这是给演出主办方的 Offer 阶段损益沙盘。下面用「Demo 2026 China Tour」的示例数据，带你从新建项目走到生成 Deal Memo。',
     speech: '欢迎使用演出预算模拟器。下面带你走一遍完整流程。',
   },
   {

@@ -1,11 +1,31 @@
 # Changelog / 版本迭代记录
 
-This product went through 80+ iterations. Each version below was a single, focused change — reflecting a tight build-test-feedback loop.
+This product went through 100+ iterations, each a single focused change — a tight build-test-feedback loop.
 
-本系统经过 80+ 次迭代，每个版本聚焦解决一个问题，体现快速「构建-测试-反馈」循环。
+本系统经过 100+ 次迭代，每个版本聚焦解决一个问题，体现快速「构建-测试-反馈」循环。当前最新：v3.8.106。
 
 | Version | Change |
 |---|---|
+| v3.8.106 | 单位描述符币种符号跟随 |
+| v3.8.105 | 币种收尾_漏网两处 |
+| v3.8.104 | 币种全转_批4展示审计 |
+| v3.8.103 | 币种全转_批234_票价行程日DealMemo |
+| v3.8.102 | 币种全转_批1成本行 |
+| v3.8.101 | VAT除法_货币收尾 |
+| v3.8.100 | 利润率口径净票房_市场参照可编辑 |
+| v3.8.99 | 保底区间_最低利润率_平均利润率 |
+| v3.8.98 | 定价决策区_目标利润率反推 |
+| v3.8.97 | 行程日彩框移到最外层 |
+| v3.8.96 | 删每场货币选择_统一菜单栏币种 |
+| v3.8.95 | 货币CNY修正_艺人占比说明_DealMemo网格 |
+| v3.8.94 | Diamond结论加倾向标签 |
+| v3.8.93 | PDF_Diamond结果更全 |
+| v3.8.92 | Diamond去录用门槛_S1摘要 |
+| v3.8.91 | Diamond评分页_均分评价_滑块标注 |
+| v3.8.90 | 差旅平摊各场_去另计 |
+| v3.8.89 | 敏感性前置_sponsorship实时 |
+| v3.8.88 | 试音日_车型扩到所有行程日 |
+| v3.8.87 | 打印中文字体强制CJK优先 |
 | v3.8.86 | 导出加下载报告HTML |
 | v3.8.85 | PDF打印中文字体_背景色修复 |
 | v3.8.84 | 艺人占比修正_改名净利润_删重复日头 |
@@ -145,33 +165,32 @@ This product went through 80+ iterations. Each version below was a single, focus
 | v3.7.7 | 数字框默认值 |
 | v3.7.6 | 默认0变50 |
 | v3.7.5 | 文本框闪烁 |
-| v3.7.4. | html |
-| v3.7.3. | html |
-| v3.7.2. | html |
-| v3.7.1. | html |
-| v3.7. | html |
-| v3.6. | html |
-| v3.5. | html |
-| v3.4. | html |
-| v3.3. | html |
-| v3.2. | html |
-| v3.1. | html |
-| v3.0. | html |
-| v2.9. | html |
-| v2.8. | html |
-| v2.7. | html |
-| v2.6. | html |
-| v2.5. | html |
-| v2.4. | html |
-| v2.3. | html |
-| v2.2. | html |
-| v2.1. | html |
-| v2.0. | html |
-| v1.4 | hermes |
-| v1.3.8. | html |
-| v1.3.1. | html |
-| v1.3. | html |
+| v3.7.4 | — |
+| v3.7.3 | — |
+| v3.7.2 | — |
+| v3.7.1 | — |
+| v3.7 | — |
+| v3.6 | — |
+| v3.5 | — |
+| v3.4 | — |
+| v3.3 | — |
+| v3.2 | — |
+| v3.1 | — |
+| v3.0 | — |
+| v2.9 | — |
+| v2.8 | — |
+| v2.7 | — |
+| v2.6 | — |
+| v2.5 | — |
+| v2.4 | — |
+| v2.3 | — |
+| v2.2 | — |
+| v2.1 | — |
+| v2.0 | — |
+| v1.4 | hermes version |
+| v1.3.8 | — |
+| v1.3.1 | — |
+| v1.3 | — |
 | v1.2 | pre-fix |
-| v1.2. | html |
-| v1.1. | html |
-| v1. | html |
+| v1.1 | — |
+| v1 | — |
