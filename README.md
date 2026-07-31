@@ -1,66 +1,76 @@
-# Quick P&L Simulator / 快速损益模拟系统
+# Live Event Deal Decision System / 演出机会商业决策系统
 
-A self-contained tool for building tour profit-and-loss (P&L) estimates for live music — venues, ticketing, travel, personnel, taxes, and deal offers — in real time. Built for promoters and tour bookers to model a multi-city tour and produce a clean Deal Memo in seconds.
+A self-contained decision-support product for evaluating live-event opportunities, modelling multi-city tour P&L, comparing artist OFFER structures, and producing approval or negotiation materials.
 
-为现场演出（Livehouse / 巡演）快速搭建损益测算的工具：场馆、票务、差旅、人员、税费、Offer 报价实时联动，一键生成 Deal Memo。
+面向演出主办方的单文件商业决策系统：将艺人及城市评估、上座率假设、票房、巡演成本与演出 OFFER 放入同一套可解释模型，辅助机会判断、预算制定和报价决策。
 
-> **Status:** Work in progress — actively iterating. The version you see here is the latest working build.
-> **状态：** 持续迭代中，当前为最新可用版本。
+> **Current demo:** v3.8.278  
+> **Status:** Actively iterating. The public build uses fictional, non-confidential sample data.
+>
+> **当前Demo：** v3.8.278  
+> **状态：** 持续迭代中；公开版本仅使用虚构及脱敏示例数据。
 
----
+## Try it live / 在线体验
 
-## ▶️ Try it live
+[Open the latest web demo / 打开最新在线Demo](https://blanca-vibing.github.io/quick-pnl-simulator/)
 
-This is a single self-contained HTML file — **no install, no server needed.**
+The product is delivered as one self-contained `index.html` file. It requires no installation or server, and all calculations run locally in the browser.
 
-- **Open locally:** download `index.html` and open it in any browser.
-- **Run it on the web:** turn on GitHub Pages (Settings → Pages → Branch: `main` → `/root` → Save), then visit the URL GitHub gives you.
+系统为独立的 `index.html` 文件，无需安装或服务器；计算在浏览器本地完成。
 
-## 在线体验
+## The decision it supports / 支持的核心决策
 
-整个系统是一个独立的 HTML 文件，**无需安装、无需服务器。**
+> Is this artist opportunity worth advancing, and what budget and OFFER structure should the promoter use?
+>
+> 这个艺人机会是否值得推进，以及主办方应该采用怎样的预算和演出 OFFER？
 
-- **本地打开：** 下载 `index.html`，用任意浏览器打开即可。
-- **网页运行：** 在 Settings → Pages 开启 GitHub Pages，访问生成的链接。
+## Core workflow / 核心流程
 
----
+1. Define the tour, artist, party, ticket tiers, and routing.
+2. Evaluate artist-level and city-level ticket potential.
+3. Convert assessment inputs into explainable occupancy assumptions.
+4. Model gross/net box office, operating costs, taxes, and travel.
+5. Compare guarantee, guarantee-plus-backend, and related OFFER scenarios.
+6. Review profit, margin, ROI, sensitivity, and break-even results.
+7. Produce internal approval and external Deal Memo materials.
 
-## What it does / 核心功能
+中文流程：
 
-- Real-time tour P&L across multiple cities with live recalculation
-- Auto-pull of cost defaults (security, venue rent, permits) with editable overrides
-- Ticketing potential, break-even point, and net-profit modelling
-- Offer / guarantee engine with artist-share and profit-protection logic
-- Trilingual UI (中文 / English / Español) with currency switching
-- One-click Deal Memo and full-page PDF export
+1. 填写巡演、艺人、团队、票档与路线；
+2. 完成艺人层及城市层票房潜力评估；
+3. 将评分转化为可解释的上座率假设；
+4. 测算总票房、净票房、运营成本、税费与差旅；
+5. 比较纯保底、保底加分成等演出 OFFER；
+6. 查看利润、利润率、ROI、敏感性和盈亏平衡；
+7. 生成内部审批与对外 Deal Memo 材料。
 
-实时多城损益 · 成本自动拉取 · 售票潜力与回本点 · Offer 测算引擎 · 三语界面与货币切换 · 一键导出 Deal Memo / PDF
+## Product principles / 产品原则
 
----
+- **Explainable over black-box:** recommendations show their inputs and logic.
+- **Human judgment remains in control:** users can override assumptions with reasons.
+- **One source of truth:** the same project data drives P&L, OFFER, summaries, and Memo.
+- **Scenario comparison:** uncertainty is expressed through ranges and sensitivity, not false precision.
+- **Local-first demo:** projects can be saved and loaded as JSON without a backend.
 
-## Tech / 技术
+产品强调可解释计算、人工最终判断、跨模块单一数据源、情景比较和本地保存。
 
-Pure front-end: HTML, CSS, and vanilla JavaScript in a single file. No backend, no database — all calculation runs in the browser, so it works fully offline.
+## Languages and currencies / 语言与币种
 
-纯前端，单文件实现，全部计算在浏览器本地完成，可离线使用。
+- 中文 / English / Español
+- CNY / USD / EUR display switching
 
----
+## Repository contents / 仓库内容
 
-## About this repo / 关于本仓库
+- `index.html` — latest public product demo / 最新公开Demo
+- `portfolio.html` — earlier portfolio page; a new decision-product case narrative is being prepared
+- `CHANGELOG.md` — selected iteration history / 主要版本记录
+- `LICENSE.md` — repository license
 
-This repository contains the **demo build** of the product. All sample data (artist names, costs) is fictional and contains no confidential client information — real client P&L data is intentionally excluded.
+## Scope and roadmap / 当前边界与路线
 
-本仓库为产品 **Demo 版本**，内置艺人名与成本数字均为虚构，不含任何真实客户机密信息。
+The current release focuses on the **assessment → budget → OFFER decision** chain for Livehouse-scale touring. Opportunity intake, reusable artist assessment records, explicit Go / No-Go decision logs, real multi-user collaboration, and post-show calibration are roadmap items rather than completed platform capabilities.
 
-### 📂 Project portfolio / 项目作品集
-
-Open **[`portfolio.html`](portfolio.html)** for the full product story in one page — case study, competitive analysis, roadmap, and PRD.
-
-打开 **[`portfolio.html`](portfolio.html)** 查看完整产品故事（一页四合一）：案例展示 · 竞品分析 · 产品路线图 · PRD。
-
-See [`CHANGELOG.md`](CHANGELOG.md) for the 90+ iteration history.
-
-迭代历史见 [`CHANGELOG.md`](CHANGELOG.md)。
+当前版本聚焦Livehouse巡演的“评估—预算—OFFER决策”链路。机会档案、可复用艺人评估、明确的Go / No-Go决策记录、真实多人协作与演出后校准仍属于路线图，不将其包装为已经完成的平台能力。
 
 ---
 
