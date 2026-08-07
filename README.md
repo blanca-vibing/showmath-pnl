@@ -1,77 +1,20 @@
-# Live Event Deal Decision System / 演出机会商业决策系统
+# 演算™｜巡演 P&L 快速测算工具
 
-A self-contained decision-support product for evaluating live-event opportunities, modelling multi-city tour P&L, comparing artist OFFER structures, and producing approval or negotiation materials.
+这是演算™的公开脱敏展示版本，用于说明巡演预算制作、票房测算、报价判断与巡演汇总的六步工作流。
 
-面向演出主办方的单文件商业决策系统：将艺人及城市评估、上座率假设、票房、巡演成本与演出 OFFER 放入同一套可解释模型，辅助机会判断、预算制定和报价决策。
+## 本地预览
 
-> **Current demo:** v3.8.278  
-> **Status:** Actively iterating. The public build uses fictional, non-confidential sample data.
->
-> **当前Demo：** v3.8.278  
-> **状态：** 持续迭代中；公开版本仅使用虚构及脱敏示例数据。
+双击打开本文件夹内的 `index.html` 即可体验。该页面不依赖账户、网络服务或私下测试包中的数据。
 
-## Try it live / 在线体验
+## 数据说明
 
-[Open the latest web demo / 打开最新在线Demo](https://blanca-vibing.github.io/quick-pnl-simulator/)
+页面中的艺人、场馆、项目、机构、人员、路线、日期、金额与成本均为虚构示例，仅用于展示产品界面与计算关系，不构成真实报价、采购或项目决策依据。
 
-The product is delivered as one self-contained `index.html` file. It requires no installation or server, and all calculations run locally in the browser.
+## 包含内容
 
-系统为独立的 `index.html` 文件，无需安装或服务器；计算在浏览器本地完成。
+- `index.html`：离线可打开的公开互动展示页；
+- `docs/RELEASE_NOTES_v3.8.303.md`：版本更新记录；
+- `docs/SANITIZATION_POLICY.md`：公开数据规范；
+- `docs/UPLOAD_MANIFEST.md`：本次上传内容清单。
 
-## The decision it supports / 支持的核心决策
-
-> Is this artist opportunity worth advancing, and what budget and OFFER structure should the promoter use?
->
-> 这个艺人机会是否值得推进，以及主办方应该采用怎样的预算和演出 OFFER？
-
-## Core workflow / 核心流程
-
-1. Define the tour, artist, party, ticket tiers, and routing.
-2. Evaluate artist-level and city-level ticket potential.
-3. Convert assessment inputs into explainable occupancy assumptions.
-4. Model gross/net box office, operating costs, taxes, and travel.
-5. Compare guarantee, guarantee-plus-backend, and related OFFER scenarios.
-6. Review profit, margin, ROI, sensitivity, and break-even results.
-7. Produce internal approval and external Deal Memo materials.
-
-中文流程：
-
-1. 填写巡演、艺人、团队、票档与路线；
-2. 完成艺人层及城市层票房潜力评估；
-3. 将评分转化为可解释的上座率假设；
-4. 测算总票房、净票房、运营成本、税费与差旅；
-5. 比较纯保底、保底加分成等演出 OFFER；
-6. 查看利润、利润率、ROI、敏感性和盈亏平衡；
-7. 生成内部审批与对外 Deal Memo 材料。
-
-## Product principles / 产品原则
-
-- **Explainable over black-box:** recommendations show their inputs and logic.
-- **Human judgment remains in control:** users can override assumptions with reasons.
-- **One source of truth:** the same project data drives P&L, OFFER, summaries, and Memo.
-- **Scenario comparison:** uncertainty is expressed through ranges and sensitivity, not false precision.
-- **Local-first demo:** projects can be saved and loaded as JSON without a backend.
-
-产品强调可解释计算、人工最终判断、跨模块单一数据源、情景比较和本地保存。
-
-## Languages and currencies / 语言与币种
-
-- 中文 / English / Español
-- CNY / USD / EUR display switching
-
-## Repository contents / 仓库内容
-
-- `index.html` — latest public product demo / 最新公开Demo
-- `portfolio.html` — earlier portfolio page; a new decision-product case narrative is being prepared
-- `CHANGELOG.md` — selected iteration history / 主要版本记录
-- `LICENSE.md` — repository license
-
-## Scope and roadmap / 当前边界与路线
-
-The current release focuses on the **assessment → budget → OFFER decision** chain for Livehouse-scale touring. Opportunity intake, reusable artist assessment records, explicit Go / No-Go decision logs, real multi-user collaboration, and post-show calibration are roadmap items rather than completed platform capabilities.
-
-当前版本聚焦Livehouse巡演的“评估—预算—OFFER决策”链路。机会档案、可复用艺人评估、明确的Go / No-Go决策记录、真实多人协作与演出后校准仍属于路线图，不将其包装为已经完成的平台能力。
-
----
-
-Built by Blanca (刘雪莹) · Product Manager
+本公开包为作品展示用途，不等同于私下测试使用的完整系统包。
