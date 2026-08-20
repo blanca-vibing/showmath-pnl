@@ -1,5 +1,23 @@
-# Archive notice
+# Changelog
 
-Historical release notes have been removed from the public showcase.
+## v3.8.331 — 2026-08-20
 
-See [docs/RELEASE_NOTES_v3.8.303.md](docs/RELEASE_NOTES_v3.8.303.md) for the current public release notes.
+- 发布 Showmath™ v3.8.331 完整可用的公开脱敏单文件产品，保留 Landing、Demo、S1–S6、三语界面及本地项目保存/载入；
+- 统一 Total Tickets、Sellable 与 Sold 口径，并使平台上架张数、票面金额和平台费即时联动；
+- 重整直接成本、间接费用和未分类成本，完善酒店、城际交通、本地交通、签证、版权及其他费用归类；
+- 明确 S5 使用本场税前利润与报价敏感性，S6 使用巡演合并税后利润与净利率；
+- 综合收益税费仅在巡演汇总层按合并税前利润测算，不拆分到单个城市；
+- 对齐 NBOR、Guarantee、Backend、Door Deal、内部 Offer Memo 与对外 Deal Memo 的展示口径；
+- 完善巡演预算、成本结构、现金流、HTML、Excel、Memo、PDF/PNG 和报告图片包能力；
+- 更新公开身份、Landing 数据模糊及公开发布边界。
+
+详见 [v3.8.331 发布说明](docs/RELEASE_NOTES_v3.8.331.md)。
+
+## v3.8.303 — 2026-08-07
+
+- 发布独立公开展示页面；
+- 展示团队评估、预算制作、报价策略与巡演汇总；
+- 提供可点击的六步预算制作互动体验；
+- 使用公开演示数据说明主要界面与计算关系。
+
+详见 [v3.8.303 发布说明](docs/RELEASE_NOTES_v3.8.303.md)。
