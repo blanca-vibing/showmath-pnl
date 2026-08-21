@@ -29,6 +29,15 @@ Showmath™ — a tour P&L budgeting and scenario simulation tool. Showmath 面�
 - S1–S6 报告预览、HTML、Excel、内部 Offer Memo 和对外 Deal Memo；
 - 单文件本地运行，不上传用户录入的项目数据。
 
+## v3.8.331 最终稳定性更新
+
+- 六步速览还原真实系统界面并优化首屏布局；
+- S1 增加团队共同评估艺人票房潜力示例，S2 增加日历活动类型和场馆选择演示；
+- S3 增加可编辑的主办方周边净收入，并接入既有 NOR 及后续计算链；
+- 小屏进度条显示数字 1–6，大屏显示完整步骤名称；
+- 修复币种切换时旧输入被二次换算的问题；
+- S3、S4、S5 的城市选择相互独立，可分别保持当前城市。
+
 ## 离线与导出说明
 
 核心界面、项目计算、JSON 保存/载入、HTML 文档和 Excel 生成可在本地单文件环境运行。Memo 的 PDF/PNG 导出以及 S1–S6 PNG 图片包会在使用时从 cdnjs 加载 `html2canvas`、`jsPDF` 或 `JSZip`；这些图片类导出需要联网。离线时仍可下载 HTML，或使用浏览器提供的打印能力。

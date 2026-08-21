@@ -6,7 +6,7 @@
 <title>演算™ Showmath｜巡演项目 P&amp;L 快速测算工具</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-html{font-size:100%;--demo-banner-h:0px;--app-header-h:49px;--step-nav-h:43px}
+html{font-size:100%;--demo-banner-h:0px;--app-header-h:49px;--step-nav-h:43px;--chapter-rail-width:130px;--chapter-rail-gap:10px;--chapter-rail-reserve:calc(var(--chapter-rail-width) + var(--chapter-rail-gap))}
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif;background:#f4f5fb;color:#1a1a2e;font-size:14px}
 
 /* ── LANDING ─────────────────────────────────────────────── */
@@ -136,10 +136,10 @@ input[type=file]#file-input{display:none}
 
 /* ── MAIN SCROLL AREA ────────────────────────────────────── */
 /* 正文使用可用宽度；右侧仅保留窄章节定位滑轨。 */
-#main-cols{display:flex;align-items:flex-start;gap:20px;width:calc(100% - 164px);max-width:1320px;margin:0 auto;padding:0 16px}
+#main-cols{display:flex;align-items:flex-start;gap:20px;width:calc(100% - var(--chapter-rail-reserve) - var(--chapter-rail-reserve));max-width:1320px;margin:0 auto;padding:0 16px}
 #fee-anchor{flex:0 0 21%;position:sticky;top:calc(var(--demo-banner-h) + var(--app-header-h) + var(--step-nav-h) + 12px);align-self:flex-start;max-height:calc(100vh - var(--demo-banner-h) - var(--app-header-h) - var(--step-nav-h) - 28px);overflow:auto;padding:24px 0 40px}
 #scroll-area{flex:1 1 79%;min-width:0;padding:28px 8px 80px}
-#chapter-rail{--chapter-rail-safe:16px;position:fixed;right:10px;top:calc(var(--demo-banner-h) + var(--app-header-h) + var(--step-nav-h) + var(--chapter-rail-safe));bottom:var(--chapter-rail-safe);width:142px;z-index:185;display:none;align-items:stretch;justify-content:flex-end}
+#chapter-rail{--chapter-rail-safe:16px;position:fixed;right:0;top:calc(var(--demo-banner-h) + var(--app-header-h) + var(--step-nav-h) + var(--chapter-rail-safe));bottom:var(--chapter-rail-safe);width:var(--chapter-rail-width);z-index:185;display:none;align-items:stretch;justify-content:flex-end}
 #chapter-rail.visible{display:flex}
 .chapter-track{position:relative;width:100%;height:calc(100% - 31px);margin:15.5px 0;touch-action:none;cursor:pointer}
 .chapter-track:after{content:none;display:none}
@@ -147,14 +147,19 @@ input[type=file]#file-input{display:none}
 .chapter-dot{position:absolute;right:0;width:100%;min-height:31px;transform:translateY(-50%);border:0;background:transparent;cursor:pointer;padding:3px 22px 3px 6px;color:#64748b;text-align:right;font-family:inherit;font-size:11px;font-weight:600;line-height:1.2;border-radius:7px;white-space:nowrap;z-index:3}
 .chapter-dot:after{content:"";position:absolute;right:4px;top:50%;width:11px;height:11px;transform:translateY(-50%);border:2px solid #fff;border-radius:50%;background:#94a3b8;box-shadow:0 0 0 1px #cbd5e1}
 .chapter-dot:hover{background:#f1f5f9;color:#2d3a8c}.chapter-dot.active{background:transparent;color:#2d3a8c;font-weight:800}.chapter-dot.active:after{background:#4f46e5;box-shadow:0 0 0 2px #c7d2fe}.chapter-dot.done:after{background:#16a34a}
-.chapter-dot .chapter-index{display:inline-block;min-width:16px;color:inherit}.chapter-dot .chapter-name{display:inline-block}
+.chapter-dot .chapter-index{display:inline-block;min-width:16px;color:inherit}.chapter-dot .chapter-index:after{content:"."}.chapter-dot .chapter-name{display:inline-block}
 @media(max-width:900px){
-  #main-cols{flex-direction:column;gap:0;padding:0 8px;width:100%}
+  #main-cols{flex-direction:column;gap:0;padding:0 8px;width:calc(100% - var(--chapter-rail-reserve) - var(--chapter-rail-reserve))}
   #fee-anchor{position:static;flex-basis:auto;width:100%;max-height:none;padding:16px 8px 0}
-  #chapter-rail{display:none!important}
   #scroll-area{width:100%}
 }
-@media(min-width:901px) and (max-width:1100px){#main-cols{width:calc(100% - 146px)}#chapter-rail{width:126px}.chapter-dot{font-size:10.5px}}
+@media(max-width:1599.98px){
+  html{--chapter-rail-width:52px;--chapter-rail-gap:12px}
+  .chapter-dot{right:10px;display:flex;align-items:center;justify-content:center;width:32px;height:32px;min-height:32px;padding:0;border:2px solid #fff;border-radius:50%;background:#94a3b8;color:#fff;text-align:center;box-shadow:0 0 0 1px #cbd5e1;font-size:12px;font-weight:800;line-height:1}
+  .chapter-dot:after{content:none}
+  .chapter-dot:hover{background:#64748b;color:#fff}.chapter-dot.active{background:#4f46e5;color:#fff;box-shadow:0 0 0 2px #c7d2fe}.chapter-dot.done{background:#16a34a;color:#fff;box-shadow:0 0 0 1px #bbf7d0}
+  .chapter-dot .chapter-index{min-width:0}.chapter-dot .chapter-index:after{content:none}.chapter-dot .chapter-name{display:none}
+}
 /* 秀费锚点卡片 */
 .fa-card{background:#fff;border:1.5px solid #c7d2fe;border-radius:12px;padding:16px;box-shadow:0 2px 10px rgba(45,58,140,.06)}
 .fa-title{font-size:13px;font-weight:700;color:#2d3a8c;display:flex;align-items:center;gap:6px;margin-bottom:10px}
@@ -728,7 +733,7 @@ hr.divider{border:none;border-top:1px solid #eee;margin:16px 0}
 .lnd2-feature{border-bottom:0}
 .lnd2-feature.with-summary{padding-bottom:130px}
 .lnd2-summary-closing{padding-bottom:0}
-.lnd6-workflow{width:min(1180px,calc(100% - 48px));margin:0 auto;padding:28px 0 126px;text-align:center}.lnd6-workflow-head{max-width:680px;margin:0 auto 28px}.lnd6-workflow-head h2{margin:0;color:#17245c;font-size:30px;line-height:1.25;letter-spacing:-.025em}.lnd6-workflow-head p{margin:10px 0 0;color:#68738c;font-size:15px;line-height:1.7}.lnd6-window{overflow:hidden;border:1px solid #d8deed;border-radius:14px;background:#f4f6fb;box-shadow:0 22px 50px rgba(37,56,120,.11)}.lnd6-stage{position:relative;overflow:hidden;aspect-ratio:1265/712;background:#f5f7fc}.lnd6-screen{display:block;width:100%;height:100%;object-fit:contain;object-position:center top;opacity:1;transform:translateY(0);transition:opacity .2s ease,transform .2s ease}.lnd6-stage.is-changing .lnd6-screen{opacity:0;transform:translateY(7px)}.lnd6-tabs{position:absolute;z-index:3;top:6.55%;left:0;width:53.8%;height:6.15%;display:grid;grid-template-columns:repeat(6,minmax(0,1fr))}.lnd6-tab{min-width:0;padding:0;border:0;border-radius:0;background:transparent;cursor:pointer}.lnd6-tab:hover{background:rgba(54,76,158,.055)}.lnd6-tab:focus-visible{outline:2px solid #314795;outline-offset:-2px}.lnd6-tab span{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}.lnd6-cursor{position:absolute;z-index:4;left:18%;top:31%;width:24px;height:32px;filter:drop-shadow(0 2px 2px rgba(24,38,83,.32));opacity:0;pointer-events:none}.lnd6-cursor svg{display:block;width:100%;height:100%}.lnd6-workflow.is-animating .lnd6-cursor{animation:lnd6-cursor-sweep 1.42s cubic-bezier(.22,.7,.28,1) 1 both}@keyframes lnd6-cursor-sweep{0%{opacity:0;left:18%;top:31%;transform:scale(.9)}16%{opacity:1}78%{opacity:1;left:46%;top:51%;transform:scale(1)}100%{opacity:0;left:46%;top:51%;transform:scale(1)}}.lnd6-caption{min-height:22px;margin:12px 8px 0;color:#68738a;font-size:12px;line-height:1.6;text-align:center}@media(max-width:900px){.lnd6-workflow{width:min(100% - 36px,1180px);padding-top:10px;padding-bottom:96px}.lnd6-workflow-head h2{font-size:28px}.lnd6-stage{border-radius:0}}@media(max-width:560px){.lnd6-workflow{width:calc(100% - 28px);padding-bottom:70px}.lnd6-workflow-head{margin-bottom:18px}.lnd6-workflow-head h2{font-size:24px}.lnd6-workflow-head p{font-size:13px}.lnd6-caption{font-size:11px}.lnd6-cursor{display:none}}@media(prefers-reduced-motion:reduce){.lnd6-workflow *{animation:none!important;transition-duration:0s!important}.lnd6-cursor{display:none}}
+.lnd6-workflow{width:min(1180px,calc(100% - 48px));margin:0 auto;padding:28px 0 126px;text-align:center}.lnd6-workflow-head{max-width:680px;margin:0 auto 28px}.lnd6-workflow-head h2{margin:0;color:#17245c;font-size:30px;line-height:1.25;letter-spacing:-.025em}.lnd6-workflow-head p{margin:10px 0 0;color:#68738c;font-size:15px;line-height:1.7}.lnd6-window{overflow:hidden;border:1px solid #d8deed;border-radius:14px;background:#f4f6fb;box-shadow:0 22px 50px rgba(37,56,120,.11)}.lnd6-stage{position:relative;overflow:hidden;aspect-ratio:1265/712;background:#f5f7fc}.lnd6-screen{display:block;width:100%;height:100%;object-fit:contain;object-position:center top;opacity:1;transform:translateY(0);transition:opacity .2s ease,transform .2s ease}.lnd6-stage.is-changing .lnd6-screen{opacity:0;transform:translateY(7px)}.lnd6-tabs{position:absolute;z-index:3;top:6.55%;left:0;width:53.8%;height:6.15%;display:grid;grid-template-columns:repeat(6,minmax(0,1fr))}.lnd6-tab{min-width:0;padding:0;border:0;border-radius:0;background:transparent;cursor:pointer}.lnd6-tab:hover{background:rgba(54,76,158,.055)}.lnd6-tab:focus-visible{outline:2px solid #314795;outline-offset:-2px}.lnd6-tab span{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}.lnd6-cursor{position:absolute;z-index:4;left:18%;top:31%;width:24px;height:32px;filter:drop-shadow(0 2px 2px rgba(24,38,83,.32));opacity:1;pointer-events:none}.lnd6-cursor svg{display:block;width:100%;height:100%}.lnd6-workflow.is-animating .lnd6-cursor{animation:lnd6-cursor-sweep 1.42s cubic-bezier(.22,.7,.28,1) 1 both}@keyframes lnd6-cursor-sweep{0%{opacity:1;left:18%;top:31%;transform:scale(.9)}16%{opacity:1}78%{opacity:1;left:46%;top:51%;transform:scale(1)}100%{opacity:1;left:46%;top:51%;transform:scale(1)}}.lnd6-caption{min-height:22px;margin:12px 8px 0;color:#68738a;font-size:12px;line-height:1.6;text-align:center}@media(max-width:900px){.lnd6-workflow{width:min(100% - 36px,1180px);padding-top:10px;padding-bottom:96px}.lnd6-workflow-head h2{font-size:28px}.lnd6-stage{border-radius:0}}@media(max-width:560px){.lnd6-workflow{width:calc(100% - 28px);padding-bottom:70px}.lnd6-workflow-head{margin-bottom:18px}.lnd6-workflow-head h2{font-size:24px}.lnd6-workflow-head p{font-size:13px}.lnd6-caption{font-size:11px}.lnd6-cursor{display:none}}@media(prefers-reduced-motion:reduce){.lnd6-workflow *{animation:none!important;transition-duration:0s!important}.lnd6-cursor{display:none}}
 .lnd2-disclaimer{margin-top:0;padding-top:0;border-top:0}
 .lnd2-footer{width:100%;margin:0;padding:30px 36px 50px;grid-template-columns:auto minmax(0,1fr) auto}
 @media(max-width:900px){.lnd2-hero{padding-top:88px}.lnd2-feature.with-summary{padding-bottom:105px}.lnd2-footer{padding-right:24px;padding-left:24px}}
@@ -781,6 +786,24 @@ hr.divider{border:none;border-top:1px solid #eee;margin:16px 0}
 @media(max-width:900px){.lnd2-experience-panel{left:0;right:auto;width:min(300px,calc(100vw - 24px))}.lndx-entry{width:min(100% - 36px,1180px);padding:10px 0 96px}.lndx-entry-card{grid-template-columns:1fr;gap:28px;padding:34px}.lndx-entry-action{max-width:520px}.lnd6-page .lnd6-workflow-head h1{font-size:31px}.lnd6-visible-tabs{display:flex;overflow-x:auto;gap:7px;padding:2px 2px 7px;scroll-snap-type:x proximity}.lnd6-switch{flex:0 0 132px;scroll-snap-align:start}.lnd6-next{grid-template-columns:1fr}.lnd6-next button{justify-self:start}}
 @media(max-width:640px){.lnd-nav{padding:0 12px;gap:10px}.landing-logo b{display:none}.lnd-nav-actions{gap:6px}.lnd-lang{width:54px;max-width:54px;padding:7px 2px;font-size:11px}#lnd-experience-trigger{padding:8px 6px}.lnd-nav-primary{padding:10px 12px!important}#lnd-experience-label{font-size:0}#lnd-experience-label:after{content:attr(data-short-label);font-size:12px}}
 @media(max-width:560px){.lnd-nav{padding:0 12px;gap:10px}.lnd-nav-actions{gap:6px}.lnd-lang{width:54px;max-width:54px;padding:7px 2px;font-size:11px}#lnd-experience-trigger{padding:8px 6px}.lnd-nav-primary{padding:10px 12px!important}.lnd2-experience-panel{position:fixed;top:92px;right:12px;left:12px;width:auto}.lnd2-experience-panel button{padding:12px 10px}.lndx-entry{width:calc(100% - 28px);padding-bottom:70px}.lndx-entry-card{gap:24px;padding:28px 22px;border-radius:16px}.lndx-entry h2{font-size:24px}.lndx-entry p{font-size:13px}.lndx-entry-steps{gap:4px}.lndx-entry-steps span{height:34px}.lndx-entry-button{font-size:13px}#landing-six-step-page{min-height:calc(100vh - 92px);padding:24px 14px 60px}.lnd6-page-top{margin-bottom:22px}.lnd6-page-badge{font-size:9px}.lnd6-page .lnd6-workflow-head h1{font-size:27px}.lnd6-page .lnd6-workflow-head p{font-size:13px}.lnd6-switch{flex-basis:112px}.lnd6-next{margin-top:24px;padding:20px}.lnd6-next h2{font-size:17px}#lnd-experience-label{font-size:0}#lnd-experience-label:after{content:attr(data-short-label);font-size:12px}}
+/* v3.8.331 · Landing six-step previews start at the native section title; the simulated app shell is removed. */
+.lnd6-stage{aspect-ratio:1265/586}
+.lnd6-tabs{display:none!important}
+.lnd6-cursor{left:46%;top:51%;opacity:1}
+.lnd6-workflow.is-animating .lnd6-cursor{animation:lnd6-cursor-sweep 1.42s cubic-bezier(.22,.7,.28,1) 1 both}
+@keyframes lnd6-cursor-sweep{0%{opacity:1;left:18%;top:31%;transform:scale(.9)}16%{opacity:1}78%{opacity:1;left:46%;top:51%;transform:scale(1)}100%{opacity:1;left:46%;top:51%;transform:scale(1)}}
+#landing-six-step-preview[data-lnd6-index="0"] .lnd6-cursor{animation:lnd6-s1-cursor 8s cubic-bezier(.22,.7,.28,1) infinite both!important}
+@keyframes lnd6-s1-cursor{0%,8%{opacity:1;left:18%;top:31%;transform:scale(.94)}24%{opacity:1;left:17%;top:83%;transform:scale(1)}34%{opacity:1;left:17%;top:83%;transform:scale(.88)}46%{opacity:1;left:17%;top:83%;transform:scale(1)}64%,100%{opacity:1;left:84%;top:86%;transform:scale(1)}}
+#landing-six-step-preview[data-lnd6-index="1"] .lnd6-cursor{animation:lnd6-s2-cursor 10s cubic-bezier(.22,.7,.28,1) infinite both!important}
+@keyframes lnd6-s2-cursor{0%,6%{opacity:1;left:18%;top:31%;transform:scale(.94)}15%{opacity:1;left:10%;top:65%;transform:scale(1)}27%{opacity:1;left:73%;top:44%;transform:scale(1)}43%{opacity:1;left:72%;top:48%;transform:scale(1)}58%{opacity:1;left:72%;top:61%;transform:scale(1)}72%{opacity:1;left:83%;top:80%;transform:scale(.92)}78%,100%{opacity:1;left:10%;top:65%;transform:scale(1)}}
+.lnd6-highlight{min-height:24px;margin:16px 18px 0;color:#2d3a8c;font-size:14px;font-weight:750;line-height:1.65;text-align:center}
+.lnd6-caption{margin-top:7px}
+@media(max-width:560px){.lnd6-highlight{margin:12px 8px 0;font-size:12px}.lnd6-cursor{display:block;width:18px;height:24px}}
+/* v3.8.331 · Six-step first-screen responsive shell. UI previews, animation and business content stay unchanged. */
+#landing-six-step-page{padding:clamp(12px,2dvh,22px) 24px 72px;overflow-x:hidden}.lnd6-page-top{display:grid;grid-template-columns:max-content minmax(0,1fr) max-content;align-items:center;gap:clamp(12px,2.2vw,28px);margin:0 0 clamp(7px,1.2dvh,13px)}.lnd6-page-top .lnd6-workflow-head{min-width:0;max-width:none;margin:0;text-align:center}.lnd6-page-top .lnd6-workflow-head h1{margin:0;color:#17245c;font-size:clamp(26px,1.75vw,28px);line-height:1.12;letter-spacing:-.025em}.lnd6-page-top .lnd6-workflow-head p{margin:4px 0 0;color:#68738c;font-size:clamp(12px,.82vw,14px);line-height:1.35}.lnd6-page .lnd6-workflow{width:100%;margin:0;padding:0}.lnd6-visible-tabs{width:100%;margin:0 auto clamp(5px,.8dvh,8px);gap:7px}.lnd6-switch{padding:7px 7px}.lnd6-switch small{margin-bottom:2px}.lnd6-page .lnd6-window{width:100%;max-width:1180px;margin:0 auto;padding:clamp(5px,.65dvh,8px)}.lnd6-page .lnd6-stage{width:100%;aspect-ratio:1265/586}.lnd6-highlight{min-height:22px;margin:clamp(7px,1.2dvh,13px) 12px 0;font-size:clamp(12px,.82vw,14px);line-height:1.45}.lnd6-page .lnd6-caption{min-height:0;margin:3px 8px 0;font-size:clamp(10px,.68vw,11px);line-height:1.4}.lnd6-next{margin-top:clamp(18px,3dvh,30px)}
+@media(max-height:900px){#landing-six-step-page{padding-top:clamp(8px,1.35dvh,13px)}.lnd6-page-top{gap:clamp(10px,1.8vw,22px);margin-bottom:clamp(5px,.9dvh,8px)}.lnd6-page-top .lnd6-workflow-head h1{font-size:clamp(22px,1.65vw,24px)}.lnd6-page-top .lnd6-workflow-head p{margin-top:2px;font-size:12px;line-height:1.25}.lnd6-back{padding:7px 10px}.lnd6-page-badge{padding:6px 9px}.lnd6-visible-tabs,.lnd6-page .lnd6-window{width:min(100%,max(280px,calc(215.87vh - 647.61px)));width:min(100%,max(280px,calc(215.87dvh - 647.61px)))}.lnd6-visible-tabs{margin-bottom:5px}.lnd6-switch{padding:6px}.lnd6-page .lnd6-window{padding:5px}.lnd6-highlight{margin-top:7px;line-height:1.4}.lnd6-page .lnd6-caption{margin-top:2px;line-height:1.3}}
+@media(max-height:750px){#landing-six-step-page{padding-top:6px}.lnd6-page-top{margin-bottom:4px}.lnd6-page-top .lnd6-workflow-head h1{font-size:22px}.lnd6-page-top .lnd6-workflow-head p{font-size:11px;line-height:1.2}.lnd6-back{padding:6px 9px}.lnd6-page-badge{padding:5px 8px}.lnd6-visible-tabs,.lnd6-page .lnd6-window{width:min(100%,max(280px,calc(215.87vh - 669.20px)));width:min(100%,max(280px,calc(215.87dvh - 669.20px)))}.lnd6-visible-tabs{margin-bottom:4px}.lnd6-switch{padding:5px 6px}.lnd6-switch small{margin-bottom:1px}.lnd6-page .lnd6-window{padding:4px}.lnd6-highlight{margin-top:5px;font-size:12px;line-height:1.35}.lnd6-page .lnd6-caption{margin-top:1px;font-size:10px;line-height:1.25}.lnd6-next{margin-top:16px}}
+@media(max-width:700px){#landing-six-step-page{padding-right:14px;padding-left:14px}.lnd6-page-top{gap:6px}.lnd6-page-top .lnd6-workflow-head h1{font-size:clamp(18px,4.2vw,22px)}.lnd6-page-top .lnd6-workflow-head p{font-size:10px}.lnd6-back{gap:4px;padding:6px 7px;font-size:10px}.lnd6-page-badge{padding:5px 6px;font-size:8px;letter-spacing:0}.lnd6-visible-tabs{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));overflow:visible;padding:0}.lnd6-switch{min-width:0;flex:auto}.lnd6-switch span{font-size:10px}}
 </style>
 <!-- [v3.8.83] 导出整页 PDF 改用浏览器原生打印(window.print)，离线可用，不再依赖 html2pdf CDN -->
 </head>
@@ -903,13 +926,13 @@ hr.divider{border:none;border-top:1px solid #eee;margin:16px 0}
     <div class="lnd6-page-shell">
       <div class="lnd6-page-top">
         <button class="lnd6-back" type="button" onclick="showLandingHome()" id="lnd6-back">← 返回首页</button>
-        <span class="lnd6-page-badge" id="lnd6-badge">约 1 分钟 · 无需录入</span>
-      </div>
-      <section class="lnd6-workflow" id="landing-six-step-preview" aria-labelledby="lnd6-title">
         <div class="lnd6-workflow-head">
           <h1 id="lnd6-title" tabindex="-1">预算制作六步速览</h1>
           <p id="lnd6-copy">点击 1–6 步，快速查看对应的系统页面。</p>
         </div>
+        <span class="lnd6-page-badge" id="lnd6-badge">约 1 分钟 · 无需录入</span>
+      </div>
+      <section class="lnd6-workflow" id="landing-six-step-preview" aria-labelledby="lnd6-title">
         <div class="lnd6-visible-tabs" id="lnd6-visible-tabs" role="tablist" aria-label="预算制作六步速览">
           <button class="lnd6-switch" id="lnd6-switch-1" type="button" role="tab" aria-controls="lnd6-stage" aria-selected="true" tabindex="0" data-lnd6-index="0"><small>01</small><span>项目信息</span></button>
           <button class="lnd6-switch" id="lnd6-switch-2" type="button" role="tab" aria-controls="lnd6-stage" aria-selected="false" tabindex="-1" data-lnd6-index="1"><small>02</small><span>演出规划</span></button>
@@ -920,18 +943,11 @@ hr.divider{border:none;border-top:1px solid #eee;margin:16px 0}
         </div>
         <div class="lnd6-window">
           <div class="lnd6-stage" id="lnd6-stage" role="tabpanel" aria-labelledby="lnd6-switch-1" aria-live="polite">
-            <img class="lnd6-screen" id="lnd6-screen" src="data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=" width="2530" height="1424" alt="项目信息的系统页面">
-            <div class="lnd6-tabs" aria-hidden="true">
-              <button class="lnd6-tab" type="button" tabindex="-1" data-lnd6-index="0"><span>项目信息</span></button>
-              <button class="lnd6-tab" type="button" tabindex="-1" data-lnd6-index="1"><span>演出规划</span></button>
-              <button class="lnd6-tab" type="button" tabindex="-1" data-lnd6-index="2"><span>演出收益</span></button>
-              <button class="lnd6-tab" type="button" tabindex="-1" data-lnd6-index="3"><span>演出成本</span></button>
-              <button class="lnd6-tab" type="button" tabindex="-1" data-lnd6-index="4"><span>损益结果</span></button>
-              <button class="lnd6-tab" type="button" tabindex="-1" data-lnd6-index="5"><span>巡演方案汇总</span></button>
-            </div>
+            <img class="lnd6-screen" id="lnd6-screen" src="data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=" width="1265" height="586" alt="项目信息的系统页面">
             <span class="lnd6-cursor" aria-hidden="true"><svg viewBox="0 0 24 32" fill="none"><path d="M3 2.5 21 18l-8.2 1.1L9.2 28 3 2.5Z" fill="#fff" stroke="#172556" stroke-width="2" stroke-linejoin="round"/></svg></span>
           </div>
         </div>
+        <p class="lnd6-highlight" id="lnd6-highlight">一键提取项目信息并自动归位；团队共同评估票房潜力，减少拍脑袋决策。</p>
         <p class="lnd6-caption" id="lnd6-caption">图示：项目信息页面，集中整理机会档案、巡演日期与基础资料。*</p>
       </section>
       <section class="lnd6-next" aria-labelledby="lnd6-next-title">
@@ -2093,7 +2109,7 @@ function defaultCosts(){
     if(i.key==='wristband') entry.unitPrice=0.24;      // 手环单价默认¥0.24/个
     if(i.key==='lanyard')   entry.unitPrice=2.8;       // 挂牌套装默认¥2.8/套
     if(i.key==='visa') entry.visaRows=[{nationality:'',visaType:'',unitPrice:0,persons:0}];
-    if(i.key==='merch_placeholder') entry.merchData={mode:'artist_self',items:[]};
+    if(i.key==='merch_placeholder') entry.merchData={mode:'artist_self',items:[],netIncome:0};
     c[i.key]=entry;
   });
   return c;
@@ -2498,6 +2514,55 @@ function onBacklineLevel(k){ state.backlineLevel=k; applyBacklineToAll(); render
 // ══════════════════════════════════════════════════════════
 let isDemo = false;
 let state = defaultState();
+
+// [v3.8.331] S3/S4/S5 当前查看城市是会话级 UI 状态，不写入项目 JSON。
+// 以场次/行程对象引用跟随增删与排序；引用被删除时按原索引回退到最近仍存在项。
+const STEP_CITY_VIEW={s3:null,s4:null,s5:null};
+function resetStepCityViews(){ STEP_CITY_VIEW.s3=null; STEP_CITY_VIEW.s4=null; STEP_CITY_VIEW.s5=null; }
+function stepShowViewIndex(step){
+  const shows=(state&&Array.isArray(state.shows))?state.shows:[];
+  if(!shows.length) return -1;
+  const view=STEP_CITY_VIEW[step];
+  let idx=view&&view.ref?shows.indexOf(view.ref):-1;
+  if(idx<0){
+    const fallback=view&&Number.isInteger(view.index)?view.index:0;
+    idx=Math.max(0,Math.min(shows.length-1,fallback));
+  }
+  STEP_CITY_VIEW[step]={ref:shows[idx],index:idx};
+  return idx;
+}
+function setStepShowView(step,idx,shouldRender){
+  const shows=(state&&Array.isArray(state.shows))?state.shows:[];
+  if(!shows.length){ STEP_CITY_VIEW[step]=null; return -1; }
+  idx=Math.max(0,Math.min(shows.length-1,+idx||0));
+  STEP_CITY_VIEW[step]={ref:shows[idx],index:idx};
+  if(shouldRender!==false) render();
+  return idx;
+}
+function activeS4CostView(){
+  const shows=(state&&Array.isArray(state.shows))?state.shows:[];
+  const logi=(state&&Array.isArray(state.logiDays))?state.logiDays:[];
+  let view=STEP_CITY_VIEW.s4, kind=view&&view.k==='logi'?'logi':'show';
+  let list=kind==='logi'?logi:shows;
+  if(!list.length){ kind=kind==='show'?'logi':'show'; list=kind==='logi'?logi:shows; }
+  if(!list.length){ STEP_CITY_VIEW.s4=null; return {k:'show',i:0}; }
+  let idx=view&&view.ref?list.indexOf(view.ref):-1;
+  if(idx<0){
+    const fallback=view&&Number.isInteger(view.index)?view.index:0;
+    idx=Math.max(0,Math.min(list.length-1,fallback));
+  }
+  STEP_CITY_VIEW.s4={k:kind,ref:list[idx],index:idx};
+  return {k:kind,i:idx};
+}
+function setS4CostView(k,i,shouldRender){
+  const kind=k==='logi'?'logi':'show';
+  const list=kind==='logi'?(state.logiDays||[]):(state.shows||[]);
+  if(!list.length){ STEP_CITY_VIEW.s4=null; return activeS4CostView(); }
+  i=Math.max(0,Math.min(list.length-1,+i||0));
+  STEP_CITY_VIEW.s4={k:kind,ref:list[i],index:i};
+  if(shouldRender!==false) render();
+  return {k:kind,i};
+}
 
 function taxComponentsForTotal(total,whtBase){
   let left=Math.max(0,Math.min(100,+total||0));
@@ -2932,14 +2997,28 @@ const dShows = raw.map(s => {
 // ══════════════════════════════════════════════════════════
 //  CALCULATION ENGINE
 // ══════════════════════════════════════════════════════════
-// [v3.8.302] 主办周边净收入：主办全权管理取销售额 20% 提成；主办协助生产取销售额减生产成本。
-function showMerchIncome(show){
-  const md=((((show||{}).costs||{}).merch_placeholder||{}).merchData)||{mode:'artist_self',items:[]};
+// [v3.8.331] 主办周边净收入仍以既有 merchData 为唯一数据源。
+// 新项目可在 S3 直接填 netIncome；旧项目首次迁移时从原商品明细计算并回填。
+function calcMerchItemsIncome(md){
+  md=md||{mode:'artist_self',items:[]};
   if(md.mode==='artist_self') return 0;
   return (md.items||[]).reduce((sum,item)=>{
     const sales=Math.max(0,+item.estSales||0), revenue=Math.max(0,+item.unitPrice||0)*sales;
     return sum+(md.mode==='promoter_full'?revenue*.2:Math.max(0,revenue-Math.max(0,+item.prodCost||0)*sales));
   },0);
+}
+function ensureMerchData(show){
+  if(!show.costs||typeof show.costs!=='object')show.costs={};
+  if(!show.costs.merch_placeholder||typeof show.costs.merch_placeholder!=='object')show.costs.merch_placeholder={amount:0,resp:'promoter'};
+  const c=show.costs.merch_placeholder;
+  if(!c.merchData||typeof c.merchData!=='object')c.merchData={mode:'artist_self',items:[],netIncome:0};
+  if(!Array.isArray(c.merchData.items))c.merchData.items=[];
+  return c.merchData;
+}
+function syncMerchNetIncome(md){md.netIncome=Math.max(0,calcMerchItemsIncome(md));return md.netIncome;}
+function showMerchIncome(show){
+  const md=ensureMerchData(show);
+  return Object.prototype.hasOwnProperty.call(md,'netIncome')?Math.max(0,+md.netIncome||0):Math.max(0,calcMerchItemsIncome(md));
 }
 // [v3.8.328] 两类 Backend 在“保底＋分成”结构内彼此独立；切换到纯保底/纯分成时休眠，
 // 但保留草稿。“是否计入内部 P&L”只影响内部损益，不改变该 G+B 合同的 Walkout / Deal Memo 金额。
@@ -3762,7 +3841,7 @@ function _kxApplyShowCalendar(items){
   state.shows.sort((a,b)=>(a.date||'').localeCompare(b.date||''));
   applyBacklineToAll(); amortizeTourCosts();
   if(ready.length){
-    state.activeShowIdx=state.shows.findIndex(s=>s.date===ready[0].date);
+    setStepShowView('s3',state.shows.findIndex(s=>s.date===ready[0].date),false);
     const firstShowDate=new Date(ready[0].date+'T00:00:00');
     state.calYear=firstShowDate.getFullYear();
     state.calMonth=firstShowDate.getMonth();
@@ -4531,13 +4610,13 @@ function editShowDate(idx, val){
     sh.costs.venue_rent._rentFallback=(((_dow===6&&!(v.rs>0))||(_dow===0&&!(v.ru>0)))&&(v.rf>0));
   }
   state.shows.sort((a,b)=>(a.date||'').localeCompare(b.date||''));
-  state.activeShowIdx=state.shows.findIndex(s=>s===sh);
+  setStepShowView('s3',state.shows.findIndex(s=>s===sh),false);
   if(!isDemo) amortizeTourCosts();
   recompute(); render();
 }
 function renderShowCard(sh, idx){
   const L=(zh,en,es)=>lang==='es'?(es||en):lang==='en'?en:zh;
-  const isActive=idx===state.activeShowIdx;
+  const isActive=idx===stepShowViewIndex('s3');
   const dis='';
   const dow=sh.date?getWeekday(sh.date):'';
   const label=`${sh.date||'—'}${dow} ${esc(sh.city||'新城市')} · ${esc(venueDisplay(sh)||'—')}`;
@@ -4598,7 +4677,7 @@ function renderTierTable(sh, showIdx){
   let ticketingRow;
   if(false){   // [v3.8.206] demo 与系统同路径
     // demo 保持旧版全局单平台展示（仅激活场），不影响 golden master
-    ticketingRow = showIdx===state.activeShowIdx ? `<div style="display:flex;gap:18px;align-items:flex-end;flex-wrap:wrap;padding:8px 0 10px;border-top:1px solid #e8eaf0;margin-bottom:8px">
+    ticketingRow = showIdx===stepShowViewIndex('s3') ? `<div style="display:flex;gap:18px;align-items:flex-end;flex-wrap:wrap;padding:8px 0 10px;border-top:1px solid #e8eaf0;margin-bottom:8px">
     <div><div style="font-size:11px;color:#888;margin-bottom:2px">票务平台</div><select id="f-platform" onchange="onTicketPlatform(this.value)" style="font-size:12px;padding:4px 6px;border:1.5px solid #c7d2fe;border-radius:6px">${TICKET_PLATFORMS.map(p=>`<option value="${p.k}" ${(state.ticketPlatform||'custom')===p.k?'selected':''}>${p.label}</option>`).join('')}</select></div>
     <div><div style="font-size:11px;color:#888;margin-bottom:2px">票务平台服务费率(%)</div><input type="number" id="f-pfrate" value="${state.platformFeeRate}" step="0.5" min="0" style="width:80px;font-size:12px;padding:4px 6px;border:1.5px solid #c7d2fe;border-radius:6px" oninput="state.platformFeeRate=+this.value;state.ticketPlatform='custom';recomputeCalc()"></div>
     <div class="hint" style="flex:1;min-width:160px;align-self:center">分销费率参考：猫眼/网易 +3%、QQ +1.6%</div>
@@ -4727,6 +4806,9 @@ function migrateTo328(data){
       if(raw==null||typeof raw!=='object') sh.costs[k]={amount:+raw||0,resp:knownResp[k]||'promoter'};
       else if(!own(raw,'resp')) raw.resp=knownResp[k]||'promoter';
     });
+    const merchData=ensureMerchData(sh);
+    if(!own(merchData,'netIncome')) merchData.netIncome=Math.max(0,calcMerchItemsIncome(merchData));
+    else merchData.netIncome=Math.max(0,+merchData.netIncome||0);
     if(!own(sh,'s6SoldPct')&&own(sh,'s6ExpectedOcc')) sh.s6SoldPct=sh.s6ExpectedOcc;
     if(own(sh,'s6ExpectedOcc')) delete sh.s6ExpectedOcc;
     if(!sh.guaranteeType||sh.guaranteeType==='per_show') sh.guaranteeType='guarantee';
@@ -4817,17 +4899,17 @@ function renderArtistFee(sh, idx){
 // ── SECTION 4: Costs ──────────────────────────────────────
 function renderS4(){
   if(!state.shows.length && !(state.logiDays||[]).length) return `<div class="section-header"><div class="section-num">4</div><div class="section-title">${t('s4')}</div></div><div class="card"><div class="text-muted" style="text-align:center;padding:20px">请先在第2步添加演出场次</div></div>`;
-  ensureActiveCost();
+  const activeCost=activeS4CostView();
   const _items=[];
   (state.shows||[]).forEach((s2,i)=>_items.push({k:'show',i,d:s2.date||'',label:'🎤 '+esc(s2.city||'城市'+(i+1))}));
   (state.logiDays||[]).forEach((ld,i)=>_items.push({k:'logi',i,d:ld.date||'',label:esc(logiTabLabel(ld))}));
   _items.sort((a,b)=>(a.d||'').localeCompare(b.d||''));
-  const tabs=_items.map(it=>`<div class="show-tab ${(state.activeCost.k===it.k&&state.activeCost.i===it.i)?'active':''}" onclick="setActiveCost('${it.k}',${it.i})"><div style="font-size:9px;opacity:.6;line-height:1.1">${it.d?it.d.slice(5)+getWeekday(it.d):''}</div>${it.label}</div>`).join('');
+  const tabs=_items.map(it=>`<div class="show-tab ${(activeCost.k===it.k&&activeCost.i===it.i)?'active':''}" onclick="setS4ActiveCost('${it.k}',${it.i})"><div style="font-size:9px;opacity:.6;line-height:1.1">${it.d?it.d.slice(5)+getWeekday(it.d):''}</div>${it.label}</div>`).join('');
   let bodyHtml, summaryHtml='';
-  if(state.activeCost.k==='logi' && state.logiDays[state.activeCost.i]){
-    bodyHtml=`<div style="margin-top:12px">${renderLogiCard(state.logiDays[state.activeCost.i], state.activeCost.i)}</div>`;
+  if(activeCost.k==='logi' && state.logiDays[activeCost.i]){
+    bodyHtml=`<div style="margin-top:12px">${renderLogiCard(state.logiDays[activeCost.i], activeCost.i)}</div>`;
   }else{
-    const si=(state.activeCost.k==='show')?state.activeCost.i:(state.activeShowIdx||0);
+    const si=(activeCost.k==='show')?activeCost.i:0;
     const sh=state.shows[si]||state.shows[0]; const r=calcShow(sh);
     const groups=activeCostGroups().map(g=>renderCostGroup(g,sh,r,si)).join('');
     bodyHtml=`<div style="font-size:17px;font-weight:700;color:#2d3a8c;margin:8px 0 12px">运营成本</div>
@@ -4845,13 +4927,10 @@ ${groups}
 </div>`;
 }
 function ensureActiveCost(){
-  if(!state.activeCost) state.activeCost={k:'show',i:state.activeShowIdx||0};
-  const ac=state.activeCost;
-  if(ac.k==='show' && ac.i>=(state.shows||[]).length) state.activeCost={k:'show',i:0};
-  if(ac.k==='logi' && ac.i>=(state.logiDays||[]).length) state.activeCost={k:'show',i:0};
-  if(!(state.shows||[]).length && (state.logiDays||[]).length && state.activeCost.k==='show') state.activeCost={k:'logi',i:0};
+  return activeS4CostView();
 }
-function setActiveCost(k,i){ state.activeCost={k,i:+i}; if(k==='show') state.activeShowIdx=+i; render(); }
+function setS4ActiveCost(k,i){ setS4CostView(k,i,true); }
+function setActiveCost(k,i){ setS4ActiveCost(k,i); }
 function logiTabLabel(ld){
   const m=dayTypeMeta(ld.type);
   if(ld.type==='landing') return m.icon+' '+(ld.city||'落地');
@@ -5554,7 +5633,7 @@ function onOfferEditGua(idx, v){ const sh=state.shows[idx]; if(!sh) return; sh._
 function offerUseSuggested(idx){ const sh=state.shows[idx]; if(!sh) return; sh._offerEditGua=Math.round(computeOffer(sh).ceilGua); render(); }
 
 function onSponsorInput(v){
-  const idx=state.activeShowIdx; const sh=state.shows[idx]; if(!sh) return;
+  const idx=stepShowViewIndex('s5'); const sh=state.shows[idx]; if(!sh) return;
   sh.sponsorship=Math.max(0,mWr(v)); recompute();
   const _plannedOcc=Math.round((sh.tiers&&sh.tiers[0]?sh.tiers[0].occ:85)||85);
   const r= isDemo ? calcShow(sh) : calcShow(sh, _plannedOcc);   // 与 renderS5 同口径（票档上座率）
@@ -5819,19 +5898,26 @@ function pnlPanelsHTML(){
 }
 // [v3.8.140] S3 票房瀑布（票档规划完成即算，满座潜力 100%）
 function onSponsorInput2(idx,v){ if(isDemo) return; const sh=state.shows[idx]; if(!sh) return; sh.sponsorship=Math.max(0,mWr(v)); render(); }
+function onMerchIncomeInput(idx,v){
+  if(isDemo) return;
+  const sh=state.shows[idx]; if(!sh) return;
+  ensureMerchData(sh).netIncome=Math.max(0,mWr(v));
+  render();
+}
 function renderRevenueWaterfall(sh, idx){
   const L=(zh,en,es)=>lang==='es'?(es||en):lang==='en'?en:zh;
   const r=calcShow(sh,100); const spon=sh.sponsorship||0; const merch=r.merchIncome||0; const bizTax=r.bizTax||vatOf(r.gross);
   const line=(lbl,val,bold)=>`<div class="s3-money-line ${bold?'total':''}"><span>${lbl}</span><span>${cm(val)}</span></div>`;
+  const moneyInput=(id2,lbl,val,handler)=>`<div class="s3-money-line"><span>${lbl}</span><input type="number" id="${id2}-${idx}" value="${mIn(val)}" min="0" placeholder="0" aria-label="${lbl}" style="width:110px;font-size:12px;padding:3px 6px;border:1.5px solid #c7d2fe;border-radius:6px" oninput="${handler}(${idx},this.value)"></div>`;
   return `<div id="rev-wf-${idx}" class="s3-revenue-card" style="border:1.5px solid #c7d2fe;border-radius:10px;padding:14px;background:#fafbff">
     <div style="font-weight:700;color:#2d3a8c;margin-bottom:8px">📋 ${L('票房','Box office','Taquilla')} <span style="font-size:11px;font-weight:400;color:#888">${L('满座潜力 · 100% 容量','Full-house potential · 100% capacity','Potencial a aforo completo · 100% del aforo')}</span></div>
     <div style="font-size:13px;color:#444">
-      ${line('总票房', r.gross)}
+      ${line(L('总票房','Gross box office','Taquilla bruta'), r.gross)}
       ${line(L('综合票房预估扣点 ','Estimated box-office deduction ','Deducción estimada de taquilla ')+(state.businessTaxRate||0)+'%', -bizTax)}
-      ${line('净票房', r.net, true)}
-      <div class="s3-money-line"><span>净赞助</span><input type="number" id="rev-spon-${idx}" value="${mIn(spon)}" min="0" placeholder="0" style="width:110px;font-size:12px;padding:3px 6px;border:1.5px solid #c7d2fe;border-radius:6px" oninput="onSponsorInput2(${idx},this.value)"></div>
-      ${line('主办周边净收入',merch)}
-      ${line('净营业收入合计',r.totalRevenue||0,true)}
+      ${line(L('净票房','Net box office','Taquilla neta'), r.net, true)}
+      ${moneyInput('rev-spon',L('净赞助','Net sponsorship','Patrocinio neto'),spon,'onSponsorInput2')}
+      ${moneyInput('rev-merch',L('主办周边净收入','Promoter net merchandise income','Ingreso neto de merchandising del promotor'),merch,'onMerchIncomeInput')}
+      ${line(L('净营业收入合计（NOR）','Total net operating revenue (NOR)','Ingresos operativos netos (NOR)'),r.totalRevenue||0,true)}
     </div>
   </div>`;
 }
@@ -6419,8 +6505,9 @@ function renderS5Comparison(sh,idx){
 function renderS5Legacy(){
   if(!state.shows.length) return `<div class="section-header"><div class="section-num">5</div><div class="section-title">${t('s5')}</div></div><div class="card"><div class="text-muted" style="text-align:center;padding:20px">请先添加演出场次</div></div>`;
   const dis='';
-  const tabs=state.shows.map((sh,i)=>`<div class="show-tab ${i===state.activeShowIdx?'active':''}" onclick="setActiveShow(${i})">${esc(sh.city||'城市'+(i+1))}</div>`).join('');
-  const sh=state.shows[state.activeShowIdx];
+  const activeIdx=_pdfExpand?Math.max(0,Math.min(state.shows.length-1,state.activeShowIdx||0)):stepShowViewIndex('s5');
+  const tabs=state.shows.map((sh,i)=>`<div class="show-tab ${i===activeIdx?'active':''}" onclick="setS5ActiveShow(${i})">${esc(sh.city||'城市'+(i+1))}</div>`).join('');
+  const sh=state.shows[activeIdx];
   // [v3.8.143] 新项目：S5 = 巡演实时 P&L 汇总行 + 本场 P&L 大卡（前司口径整合：票房瀑布+保底/分成+回本+净票房随上座率）。
   if(true){   // [v3.8.206] demo 与系统同路径（旧 demo 专属 S5 布局废弃）
     // [v3.8.152] 删去 S5 顶部「巡演实时 P&L」汇总条——与右侧栏「巡演实时 P&L」卡完全重复。
@@ -6429,7 +6516,7 @@ function renderS5Legacy(){
 <div class="card">
   <div class="show-tabs">${tabs}</div>
   <div class="s5w-switch"><button class="${workspace==='measure'?'active':''}" onclick="setS5Workspace('measure')">方案测算</button><button class="${workspace==='compare'?'active':''}" onclick="setS5Workspace('compare')">方案对比</button></div>
-  ${workspace==='compare'?renderS5Comparison(sh,state.activeShowIdx):renderShowPnlBig(sh, state.activeShowIdx)}
+  ${workspace==='compare'?renderS5Comparison(sh,activeIdx):renderShowPnlBig(sh,activeIdx)}
   <div style="font-size:11px;color:#aaa;margin-top:2px">巡演合计见右侧「巡演实时 P&L」卡；多城 P&L 与关键条款见第6步「汇总方案」。</div>
 </div>`;
   }
@@ -6483,7 +6570,7 @@ function renderS5Legacy(){
     </div>
   </div>`;
   })()}
-  ${isDemo?'':renderOfferPanel(sh, state.activeShowIdx)}
+  ${isDemo?'':renderOfferPanel(sh,activeIdx)}
   ${isDemo?(()=>{
     const roi=(state.targetROI||35)/100;
     const recGua=r.net/(1+roi)-r.promoterCost;     // 目标ROI口径（核心推荐）
@@ -6521,12 +6608,13 @@ ${isDemo?renderGuaranteeTour():''}`;
 // [v3.8.303] 活动 S5 仅保留新版「方案测算 / 方案对比」路径；旧实现隔离在 renderS5Legacy，不再参与渲染。
 function renderS5(){
   if(!state.shows.length) return `<div class="section-header"><div class="section-num">5</div><div class="section-title">${t('s5')}</div></div><div class="card"><div class="text-muted" style="text-align:center;padding:20px">请先添加演出场次</div></div>`;
-  const tabs=state.shows.map((sh,i)=>`<div class="show-tab ${i===state.activeShowIdx?'active':''}" onclick="setActiveShow(${i})">${esc(sh.city||'城市'+(i+1))}</div>`).join('');
-  const sh=state.shows[state.activeShowIdx];
+  const activeIdx=_pdfExpand?Math.max(0,Math.min(state.shows.length-1,state.activeShowIdx||0)):stepShowViewIndex('s5');
+  const tabs=state.shows.map((sh,i)=>`<div class="show-tab ${i===activeIdx?'active':''}" onclick="setS5ActiveShow(${i})">${esc(sh.city||'城市'+(i+1))}</div>`).join('');
+  const sh=state.shows[activeIdx];
   return `<div class="section-header"><div class="section-num">5</div><div class="section-title">${t('s5')}</div></div>
 <div class="card">
   <div class="show-tabs">${tabs}</div>
-  ${renderShowPnlBig(sh,state.activeShowIdx)}
+  ${renderShowPnlBig(sh,activeIdx)}
   <div style="font-size:11px;color:#aaa;margin-top:2px">多城满场预算、关键条款与巡演利润见第6步「总预算」。</div>
 </div>`;
 }
@@ -7936,7 +8024,7 @@ function render(){
   // [v3.7.5 ②③] 被跳过重建的段，其所有 id 化小计实时回填——不闪、不倒序，分组小计/顶部合计照样刷新
   if(skipEl && state.shows.length){
     try{
-      const _s4i=(state.activeCost&&state.activeCost.k==='show')?state.activeCost.i:state.activeShowIdx;
+      const _s4ac=activeS4CostView(), _s4i=_s4ac.k==='show'?_s4ac.i:0;
       const _sh=state.shows[_s4i];
       const _r=calcShow(_sh);
       const _setY=(eid,val)=>{const e=id(eid); if(e) e.innerHTML=fmtY(val);};
@@ -7968,7 +8056,7 @@ function render(){
   // [v3.7.45] 票档 Total Tickets(派生=K+H+C+Sellable) + 超售提醒 实时回填（票档表所在段被跳过时）
   if(skipEl && state.shows.length){
     try{
-      const _shi=state.activeShowIdx, _sh3=state.shows[_shi];
+      const _shi=stepShowViewIndex('s3'), _sh3=state.shows[_shi];
       if(_sh3){
         const _tc3=calcTierCounts(_sh3);
         (_sh3.tiers||[]).forEach((tr,ti)=>{
@@ -8015,7 +8103,7 @@ function renderPnlRail(){
   const el=id('chapter-rail'); if(!el)return;
   const secs=getSections();
   el.classList.toggle('visible',!!(id('app-wrap')&&id('app-wrap').classList.contains('visible')));
-  el.innerHTML=`<div class="chapter-track" id="chapter-track" onpointerdown="chapterRailPointer(event)"><div class="chapter-thumb" id="chapter-thumb"></div>${secs.map((s,i)=>`<button type="button" class="chapter-dot ${i===_chapterRailActive?'active':i<_chapterRailActive?'done':''}" style="top:${secs.length>1?i/(secs.length-1)*100:0}%" onclick="event.stopPropagation();scrollToSection(${i})" aria-label="${i+1}. ${esc(s.title)}" ${i===_chapterRailActive?'aria-current="location"':''}><span class="chapter-index">${i+1}.</span><span class="chapter-name">${esc(s.title)}</span></button>`).join('')}</div>`;
+  el.innerHTML=`<div class="chapter-track" id="chapter-track" onpointerdown="chapterRailPointer(event)"><div class="chapter-thumb" id="chapter-thumb"></div>${secs.map((s,i)=>`<button type="button" class="chapter-dot ${i===_chapterRailActive?'active':i<_chapterRailActive?'done':''}" style="top:${secs.length>1?i/(secs.length-1)*100:0}%" onclick="event.stopPropagation();scrollToSection(${i})" aria-label="${i+1}. ${esc(s.title)}" title="${esc(s.title)}" ${i===_chapterRailActive?'aria-current="location"':''}><span class="chapter-index">${i+1}</span><span class="chapter-name">${esc(s.title)}</span></button>`).join('')}</div>`;
   updateChapterRailProgress();
 }
 function chapterRailPointer(e){
@@ -8369,11 +8457,12 @@ function onCostQty(idx,key,val){
 function onMerchMode(idx, mode){
   const c=state.shows[idx].costs.merch_placeholder;
   if(!c) return;
-  if(!c.merchData) c.merchData={mode:'artist_self',items:[]};
+  if(!c.merchData) c.merchData={mode:'artist_self',items:[],netIncome:0};
   c.merchData.mode=mode;
   if(mode!=='artist_self' && c.merchData.items.length===0){
     c.merchData.items.push({category:'',unitPrice:0,prodCost:0,estSales:0});
   }
+  syncMerchNetIncome(c.merchData);
   rerenderSection(3);
 }
 function onMerchItem(idx, ri, field, val){
@@ -8381,19 +8470,22 @@ function onMerchItem(idx, ri, field, val){
   if(!c||!c.merchData||!c.merchData.items[ri]) return;
   const merchInputId=field==='unitPrice'?`mi-${idx}-${ri}-unit`:field==='prodCost'?`mi-${idx}-${ri}-prod`:field==='estSales'?`mi-${idx}-${ri}-sales`:'';
   c.merchData.items[ri][field]=field==='category'?val:nonNegativeInput(val,merchInputId);
+  syncMerchNetIncome(c.merchData);
   rerenderSection(3);
 }
 function addMerchItem(idx){
   const c=state.shows[idx].costs.merch_placeholder;
   if(!c) return;
-  if(!c.merchData) c.merchData={mode:'promoter_full',items:[]};
+  if(!c.merchData) c.merchData={mode:'promoter_full',items:[],netIncome:0};
   c.merchData.items.push({category:'',unitPrice:0,prodCost:0,estSales:0});
+  syncMerchNetIncome(c.merchData);
   rerenderSection(3);
 }
 function removeMerchItem(idx, ri){
   const c=state.shows[idx].costs.merch_placeholder;
   if(!c||!c.merchData||c.merchData.items.length<=1) return;
   c.merchData.items.splice(ri,1);
+  syncMerchNetIncome(c.merchData);
   rerenderSection(3);
 }
 function onVisaRow(idx, rowIdx, field, val){
@@ -8591,9 +8683,9 @@ function onCostResp(showIdx, costKey, resp){
 }
 
 function copyGroupToAll(groupKey){
-  // [331 验收 A9 补充] 复制按钮位于 S4，来源必须是 S4 当前正在显示的场次；
-  // S5 的 activeShowIdx 可能指向另一城，不能反向把那一城的空数据覆盖回来。
-  const srcIdx=(state.activeCost&&state.activeCost.k==='show')?+state.activeCost.i:state.activeShowIdx;
+  // 复制按钮位于 S4，来源只认 S4 自己的当前场次，不受 S3/S5 查看位置影响。
+  const s4View=activeS4CostView();
+  const srcIdx=s4View.k==='show'?s4View.i:0;
   const src=state.shows[srcIdx];
   if(!src) return;
   const group=activeCostGroups().find(g=>g.key===groupKey);
@@ -8619,14 +8711,13 @@ function toggleCostGroup(key){
   rerenderSection(3);
 }
 
-function setActiveShow(idx){
+function setS5ActiveShow(idx){
   const sa=id('scroll-area');
   const s5=id('section-4');
   const beforeTop=s5?s5.getBoundingClientRect().top:null;
-  state.activeShowIdx=idx;
-  state.activeCost={k:'show',i:idx};   // [v3.8.25] 选演出场→上下文=演出，右栏显示本场P&L
+  setStepShowView('s5',idx,false);
   render();
-  // S4 的上下文切换会改变其高度；保持 S5 相对视口的位置，避免城市 tab 跳回演出成本。
+  // 保持 S5 相对视口的位置；S4 与 S3 的查看状态不会因此改变。
   if(sa && beforeTop!=null){
     const s5Now=id('section-4');
     if(s5Now){
@@ -8641,6 +8732,7 @@ function setActiveShow(idx){
     }
   }
 }
+function setActiveShow(idx){ setS5ActiveShow(idx); }
 
 function addTier(showIdx){
   const sh=state.shows[showIdx];
@@ -8667,10 +8759,10 @@ function removeTier(showIdx, tierIdx){
 function toggleShowCard(idx){
   const sh=state.shows[idx]; if(!sh) return;
   // [v3.8.13/#6] 真·收起：点已展开的卡→最小化；点别的卡→展开它(其余自动收起)
-  if(state.activeShowIdx===idx && !sh._collapsed){
+  if(stepShowViewIndex('s3')===idx && !sh._collapsed){
     sh._collapsed=true;            // 当前展开的卡 → 收起
   }else{
-    state.activeShowIdx=idx;
+    setStepShowView('s3',idx,false);
     sh._collapsed=false;           // 展开点中的卡（其余因非激活而收起）
   }
   render();
@@ -8930,9 +9022,10 @@ function onLevelChange(level){
 
 // 把当前激活场次的全部成本复制到其他所有演出（一键，尊重精简组）
 function copyActiveShowToAll(){
-  const src=state.shows[state.activeShowIdx]; if(!src) return;
+  const ac=activeS4CostView(),srcIdx=ac.k==='show'?ac.i:0;
+  const src=state.shows[srcIdx]; if(!src) return;
   state.shows.forEach((sh,i)=>{
-    if(i===state.activeShowIdx) return;
+    if(i===srcIdx) return;
     activeCostGroups().forEach(g=>g.items.forEach(item=>{
       if(sh.costs[item.key] && src.costs[item.key]) sh.costs[item.key]={...src.costs[item.key]};
     }));
@@ -9020,7 +9113,7 @@ function addLogiDay(dateStr, type){
   const _defCity=(type==='landing'||type==='departure')?(near?near.city:''):'';
   state.logiDays.push(newLogiDay(dateStr, type, _defCity));
   state.logiDays.sort((a,b)=>(a.date||'').localeCompare(b.date||''));
-  state.activeCost={k:'logi',i:state.logiDays.findIndex(d=>d.date===dateStr)};   // [v3.7.54] 新行程日→激活其成本tab(在演出成本区)
+  setS4CostView('logi',state.logiDays.findIndex(d=>d.date===dateStr),false);
   render();
 }
 function removeLogiDay(i){
@@ -9133,7 +9226,7 @@ function confirmAddShow(){
   state.shows.sort((a,b)=>a.date.localeCompare(b.date));
   if(!isDemo) applyBacklineToAll();   // 场数变 → 每场 Backline 重新平摊（整场共用模式）
   if(!isDemo) amortizeTourCosts();    // [v3.8.2] 场数变 → 签证一次性成本重新 ÷场数 摊销
-  state.activeShowIdx=state.shows.findIndex(s=>s.date===_pendingShowDate);
+  setStepShowView('s3',state.shows.findIndex(s=>s.date===_pendingShowDate),false);
   closeModal('add-show-modal');
   rerenderSection(1);  // 演出规划
   rerenderSection(2);  // 艺人费用（各城市保底明细）
@@ -9463,6 +9556,8 @@ function buildInternalMemoHTML(){
   const taxRateText=Number.isInteger(taxRate)?fmt(taxRate):fmt(taxRate,1);
   const tourMetricRows=[
     ['NOR','totRevenue','money'],
+    [S6L('净赞助','Net Sponsorship','Patrocinio neto'),'totSponsorship','money'],
+    [S6L('主办周边净收入','Promoter Net Merchandise Income','Ingreso neto de merchandising del promotor'),'totMerchIncome','money'],
     [S6L('直接项目成本','Direct Project Cost','Coste directo del proyecto'),'totDirectCost','money'],
     [S6L('间接费用','Indirect Expenses','Gastos indirectos'),'totIndirectCost','money'],
     [S6L('艺人费用','Artist Fee','Coste del artista'),'totArtistFee','money'],
@@ -9549,7 +9644,7 @@ function downloadMemoHTML(kind){
   _exportToast('✅ HTML 已开始下载');
 }
 function openRateModal(){if(isDemo)return;const eu=state.displayCur==='EUR';id('rate-input').value=eu?(+state.eurRate||7.9):state.exchangeRate;var t=id('rmtitle');if(t)t.textContent=lang==='es'?'Tipo de cambio':(lang==='en'?'Exchange rate':'设置汇率');var lb=document.getElementById('rate-label');if(lb)lb.textContent='CNY per 1 '+(eu?'EUR':'USD');openModal('rate-modal');}
-function setDisplayCur(c){ state.displayCur=(c==='USD'||c==='EUR')?c:'CNY'; updateHeader(); render(); }
+function setDisplayCur(c){ readInputs(); state.displayCur=(c==='USD'||c==='EUR')?c:'CNY'; recompute(); renderApp(); }
 function confirmRate(){
   const v=parseFloat(id('rate-input').value);
   if(v>0){ if(state.displayCur==='EUR'){state.eurRate=v;} else {state.exchangeRate=v;} updateHeader(); }
@@ -10953,6 +11048,7 @@ function _doGoHome(){
   id('landing').style.display='block';
   isDemo=false;
   state=defaultState();
+  resetStepCityViews();
   DIAMOND=null; DM_INIT=false;
   renderLanding();
 }
@@ -11151,6 +11247,149 @@ function renderLanding(){
   /* [v3.8.250] lnd-diamond-txt 已随 Landing 入口删除 */
   const ls=document.getElementById('landing-lang'); if(ls) ls.value=lang;
 }
+// Landing 六步速览：按当前 S1–S6 真实组件结构绘制的只读缩略图。
+// 仅服务 Landing，不读取或改写 state，也不复用系统表单 ID。
+function landingRealUiPreview(i,Lz,D){
+  const L=(zh,en,es)=>Lz(zh,en,es);
+  const xml=s=>String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  const defs=[`<filter id="landingPublicBlur" x="-15%" y="-35%" width="130%" height="170%"><feGaussianBlur stdDeviation="4.4"/></filter>`];
+  let clipSeq=0;
+  const T=(x,y,value,cls='tx',anchor='start',clip=null)=>{
+    let raw=String(value==null?'':value),masked=raw.charAt(0)==='§';
+    if(masked) raw=raw.slice(1);
+    let ca='';
+    if(masked){
+      const c=clip||[x-(anchor==='end'?100:4),y-17,108,23],id='lndMaskClip'+(++clipSeq);
+      defs.push(`<clipPath id="${id}"><rect x="${c[0]}" y="${c[1]}" width="${c[2]}" height="${c[3]}" rx="2"/></clipPath>`);
+      ca=` class="${cls} mask" clip-path="url(#${id})"`;
+    }else ca=` class="${cls}"`;
+    return `<text x="${x}" y="${y}" text-anchor="${anchor}"${ca}>${xml(raw)}</text>`;
+  };
+  const V=(x,y,key,cls='val',anchor='start',clip=null)=>T(x,y,D[key]==null?'—':D[key],cls,anchor,clip);
+  const R=(x,y,w,h,fill='#fff',stroke='#dfe3f0',rx=7,extra='')=>`<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="${rx}" fill="${fill}" stroke="${stroke}" ${extra}/>`;
+  const Ln=(x1,y1,x2,y2,color='#e5e8f2',width=1)=>`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${color}" stroke-width="${width}"/>`;
+  const Input=(x,y,w,label,valueKey)=>`${T(x,y-7,label,'label')}${R(x,y,w,30,'#fff','#c7d2fe',5)}${valueKey?V(x+10,y+20,valueKey,'input','start',[x+5,y+3,w-10,24]):''}`;
+  const Tag=(x,y,w,label,tone='blue')=>{const c=tone==='green'?['#edf9f2','#168553','#b9e2c9']:tone==='orange'?['#fff7e8','#b56a12','#f0d6a7']:tone==='plain'?['#fff','#2d3a8c','#c7d2fe']:['#eef2ff','#2d3a8c','#c7d2fe'];return `${R(x,y,w,22,c[0],c[2],11)}${T(x+w/2,y+15,label,'tag','middle')}`;};
+  const section=(n,title)=>`<circle cx="32" cy="156" r="14" fill="#2d3a8c"/>${T(32,160,String(n),'secnum','middle')}${T(54,163,title,'sectitle')}`;
+  const steps=[L('项目信息','Project info','Información'),L('演出规划','Show planning','Planificación'),L('演出收益','Show revenue','Ingresos'),L('演出成本','Show costs','Costes'),L('损益结果','P&L result','Resultado P&L'),L('巡演方案汇总','Tour summary','Resumen de gira')];
+
+  const s1=()=>{
+    const priceRows=[['P1','VIP','p1'],['P2',L('快通票','Fast Pass','Acceso rápido'),'p2'],['P3','GA '+L('全价票','Standard','General'),'p3']].map((r,n)=>{const y=405+n*27;return `${T(677,y+18,r[0],'row muted')}${T(730,y+18,r[1],'row')}${V(1155,y+18,r[2],'input','end',[1045,y+2,116,23])}${Ln(677,y+26,1170,y+26)}`;}).join('');
+    return `${section(1,steps[0])}${R(22,177,1187,510)}${T(42,207,L('机会档案','Opportunity profile','Ficha de oportunidad'),'cardtitle')}${R(42,222,1147,91,'#fbfcff','#cbd5f4',7)}
+      ${Input(60,250,250,L('机会来源','Opportunity source','Origen'),null)}${T(70,270,L('Agency / 经纪公司','Agency','Agencia'),'input')}
+      ${Input(330,250,250,L('接洽方式','Contact mode','Modalidad'),null)}${T(340,270,L('对方主动联系','Inbound','Entrante'),'input')}
+      ${Input(600,250,250,L('收到日期','Received','Recibido'),null)}${T(610,270,'2026-07-01','input')}
+      ${Input(870,250,280,L('联系人 / 团队','Contact / team','Contacto / equipo'),null)}${T(880,270,L('海外代理团队','International agency team','Equipo de agencia'),'input')}
+      ${T(42,340,L('基本信息','Basic information','Información básica'),'cardtitle')}${R(42,354,584,142,'#fff','#e0e4ef',7)}
+      ${Input(60,383,260,L('项目名称','Project name','Proyecto'),null)}${T(70,403,'The Sold Outs 2027 China Tour','input')}
+      ${Input(340,383,260,L('艺人','Artist','Artista'),null)}${T(350,403,'The Sold Outs','input')}
+      ${Input(60,441,260,L('巡演开始','Tour start','Inicio'),null)}${T(70,461,'2027-07-06','input')}
+      ${Input(340,441,260,L('巡演结束','Tour end','Fin'),null)}${T(350,461,'2027-07-21','input')}
+      ${T(660,340,L('票价与票档','Ticket prices & tiers','Precios y categorías'),'cardtitle')}${R(660,354,529,142,'#fff','#e0e4ef',7)}
+      ${T(677,383,L('票档','Tier','Categoría'),'th')}${T(730,383,L('票档名称','Tier name','Nombre'),'th')}${T(1155,383,L('单价 (CNY)','Price (CNY)','Precio (CNY)'),'th','end')}${Ln(677,390,1170,390)}${priceRows}
+      ${T(42,521,L('艺人售票潜力评估','Artist ticket-selling potential assessment','Evaluación del potencial de venta del artista'),'cardtitle')}${R(42,536,1147,132,'#fff','#cbd5f4',7)}
+      ${T(60,564,L('团队成员共同提交评估','Team members submit assessments together','El equipo presenta evaluaciones conjuntamente'),'showtitle')}
+      ${T(60,585,L('你与团队成员共同提交评估，系统汇总为团队综合结果。','You and your teammates submit assessments together; the system consolidates a team result.','Tú y tu equipo evalúan juntos; el sistema consolida el resultado del equipo.'),'note')}
+      ${R(60,607,205,34,'#eef2ff','#c7d2fe',5,'class="s1-eval-click"')}${T(163,629,L('查看具体评估细节 →','View assessment details →','Ver detalles de evaluación →'),'btn','middle')}
+      <g class="s1-eval-results">${R(333,552,836,100,'#f7f8fc','#dfe3f0',6)}
+      ${T(352,578,L('艺人综合评分','Artist composite score','Puntuación global del artista'),'label')}${V(735,578,'evalArtist','val','end',[625,560,116,23])}
+      ${T(770,578,L('城市综合评分','City composite score','Puntuación global de la ciudad'),'label')}${V(1148,578,'evalCity','val','end',[1038,560,116,23])}${Ln(352,590,1150,590)}
+      ${T(352,619,L('团队综合结果','Team composite result','Resultado global del equipo'),'label')}${T(735,619,L('中性偏乐观','Neutral-optimistic','Neutral-optimista'),'val','end')}
+      ${T(770,619,L('建议预期上座率','Suggested expected occupancy','Ocupación prevista sugerida'),'label')}${V(1148,619,'evalOcc','val','end',[1038,601,116,23])}</g>`;
+  };
+
+  const s2=()=>{
+    const names=[L('一','Mon','Lun'),L('二','Tue','Mar'),L('三','Wed','Mié'),L('四','Thu','Jue'),L('五','Fri','Vie'),L('六','Sat','Sáb'),L('日','Sun','Dom')];
+    const status={6:['#0ea5e9',L('落地日','Landing','Llegada'),L('广州','Guangzhou','Cantón')],7:['#14b8a6',L('试音日','Soundcheck','Prueba'),L('广州','Guangzhou','Cantón')],8:['#2d3a8c',L('演出日','Show','Show'),L('广州','Guangzhou','Cantón')],9:['#2d3a8c',L('演出日','Show','Show'),L('深圳','Shenzhen','Shenzhen')],10:['#e6a23c',L('移动日','Travel','Viaje'),L('深→武','Shenzhen→Wuhan','Shenzhen→Wuhan')],11:['#2d3a8c',L('演出日','Show','Show'),L('武汉','Wuhan','Wuhan')],12:['#2d3a8c',L('演出日','Show','Show'),L('北京','Beijing','Pekín')],13:['#a855f7',L('媒体日','Media','Medios'),L('北京','Beijing','Pekín')],14:['#e6a23c',L('移动日','Travel','Viaje'),L('京→杭','Beijing→Hangzhou','Pekín→Hangzhou')],15:['#2d3a8c',L('演出日','Show','Show'),L('杭州','Hangzhou','Hangzhou')],16:['#2d3a8c',L('演出日','Show','Show'),L('上海','Shanghai','Shanghái')],17:['#b0b4c0',L('休息日','Rest','Descanso'),L('上海','Shanghai','Shanghái')],18:['#2d3a8c',L('演出日','Show','Show'),L('成都','Chengdu','Chengdu')],20:['#2d3a8c',L('演出日','Show','Show'),L('重庆','Chongqing','Chongqing')],21:['#0891b2',L('离境日','Departure','Salida'),L('重庆','Chongqing','Chongqing')]};
+    const gx=45,gy=259,cw=162,ch=60;
+    let grid=names.map((n,k)=>`${R(gx+k*cw,gy,cw,ch,'#f7f8fb','#dfe3ee',0)}${T(gx+k*cw+cw/2,gy+26,n,'calhead','middle')}`).join('');
+    for(let k=0;k<35;k++){
+      const day=k-2,x=gx+(k%7)*cw,y=gy+ch+Math.floor(k/7)*ch;
+      grid+=R(x,y,cw,ch,'#fff','#dfe3ee',0);
+      if(day>0&&day<=31){grid+=T(x+10,y+19,String(day),'calday');const st=status[day];if(st){grid+=`<circle cx="${x+14}" cy="${y+38}" r="4" fill="${st[0]}"/>${T(x+23,y+42,st[1],'caltype')}${T(x+cw-10,y+60,st[2],'calcity','end')}`;}}
+    }
+    const legends=[['#2d3a8c',L('演出日','Show','Show')],['#0ea5e9',L('落地日','Landing','Llegada')],['#14b8a6',L('试音日','Soundcheck','Prueba')],['#e6a23c',L('移动日','Travel','Viaje')],['#a855f7',L('媒体日','Media','Medios')],['#b0b4c0',L('休息日','Rest','Descanso')],['#0891b2',L('离境日','Departure','Salida')]].map((a,n)=>`<circle cx="${68+n*153}" cy="650" r="5" fill="${a[0]}"/>${T(78+n*153,654,a[1],'legend')}`).join('');
+    const dayTypes=[
+      ['🎤',L('演出日','Show','Show'),L('排票房与场租等全套成本','Box office, venue rent and full show costs','Taquilla, alquiler y costes completos')],
+      ['🎚️',L('试音日','Soundcheck','Prueba'),L('计酒店 / per diem / 地面交通','Hotel / per diem / ground transport','Hotel / dietas / transporte')],
+      ['🛬',L('落地日','Landing','Llegada'),L('计酒店 / per diem / 地面交通','Hotel / per diem / ground transport','Hotel / dietas / transporte')],
+      ['🛫',L('离境日','Departure','Salida'),L('计酒店 / per diem / 地面交通','Hotel / per diem / ground transport','Hotel / dietas / transporte')],
+      ['🚌',L('移动日','Travel','Viaje'),L('计酒店 / per diem / 地面交通','Hotel / per diem / ground transport','Hotel / dietas / transporte')],
+      ['🎬',L('媒体日','Media','Medios'),L('计酒店 / per diem / 地面交通','Hotel / per diem / ground transport','Hotel / dietas / transporte')],
+      ['🛋️',L('休息日','Rest','Descanso'),L('计酒店 / per diem / 地面交通','Hotel / per diem / ground transport','Hotel / dietas / transporte')]
+    ].map((d,n)=>{const y=309+n*38;return `${R(674,y,480,32,'#fff',n===0?'#2d3a8c':'#d7dcef',6)}${T(688,y+21,d[0]+'  '+d[1],'row strong')}${T(1138,y+21,d[2],'note','end')}`;}).join('');
+    const typeModal=`<g class="s2-type-modal">${R(650,237,528,358,'#fff','#c7d2fe',10,'filter="drop-shadow(0 8px 20px rgba(31,47,108,.18))"')}${T(674,267,L('这一天是？','What happens on this day?','¿Qué ocurre este día?'),'cardtitle')}${T(674,290,'2027-07-19','showtitle')}${dayTypes}${R(1070,574,84,28,'#fff','#c7d2fe',5)}${T(1112,593,L('取消','Cancel','Cancelar'),'btn','middle')}</g>`;
+    const showModal=`<g class="s2-show-modal">${R(700,214,478,406,'#fff','#c7d2fe',10,'filter="drop-shadow(0 8px 20px rgba(31,47,108,.18))"')}${T(724,245,L('添加演出','Add show','Añadir show'),'cardtitle')}${T(724,270,'2027-07-19','showtitle')}
+      ${T(724,301,L('城市','City','Ciudad'),'label')}${R(724,310,430,38,'#fff','#c7d2fe',5)}${T(740,335,L('— 选择城市 —','— Select city —','— Seleccionar ciudad —'),'input s2-city-empty')}${T(740,335,L('广州','Guangzhou','Cantón'),'input s2-city-value')}
+      ${T(724,371,L('场馆','Venue','Recinto'),'label')}${R(724,380,430,38,'#fff','#c7d2fe',5)}${T(740,405,L('— 先选城市 —','— Select city first —','— Primero selecciona ciudad —'),'input s2-venue-empty')}${T(740,405,L('广州声音共和 ROS Livehouse','Guangzhou ROS Livehouse','ROS Livehouse Cantón'),'input s2-venue-value')}
+      ${T(724,441,L('手动修改本场最大观众容量','Edit maximum audience capacity','Editar aforo máximo'),'label')}${R(724,450,430,38,'#fff','#c7d2fe',5)}${V(1138,475,'cap','input','end',[730,454,418,30])}
+      ${T(724,510,L('选定场馆后，已有场馆主要费用将带入后续预算。','Venue costs flow into the later budget after selection.','Los costes del recinto pasan al presupuesto posterior.'),'note')}
+      ${R(954,557,88,34,'#fff','#c7d2fe',5)}${T(998,579,L('取消','Cancel','Cancelar'),'btn','middle')}${R(1054,557,100,34,'#2d3a8c','#2d3a8c',5)}${T(1104,579,L('添加','Add','Añadir'),'plain','middle')}</g>`;
+    const finalX=gx,finalY=gy+ch+3*ch;
+    const finalCell=`<g class="s2-final">${R(finalX,finalY,cw,ch,'#eef2ff','#2d3a8c',0)}${T(finalX+10,finalY+19,'19','calday')}<circle cx="${finalX+14}" cy="${finalY+38}" r="4" fill="#2d3a8c"/>${T(finalX+23,finalY+42,L('演出日','Show','Show'),'caltype')}${T(finalX+cw-10,finalY+57,L('广州 · ROS Livehouse','Guangzhou · ROS Livehouse','Cantón · ROS Livehouse'),'calcity','end')}</g>`;
+    return `${section(2,steps[1])}${R(22,177,1187,510)}${T(42,211,L('演出日历','Show calendar','Calendario de shows'),'cardtitle')}${R(975,192,88,28,'#fff','#c7d2fe',5)}${T(1019,211,L('‹ 上月','‹ Previous','‹ Anterior'),'btn','middle')}${R(1074,192,96,28,'#fff','#c7d2fe',5)}${T(1122,211,L('下月 ›','Next ›','Siguiente ›'),'btn','middle')}${T(606,239,L('2027年七月','July 2027','Julio de 2027'),'month','middle')}${grid}${legends}${typeModal}${showModal}${finalCell}`;
+  };
+
+  const s3=()=>{
+    const rows=[['VIP','p1','tierTotal1','kill1','hold1','comp1','sell1'],[L('快通票','Fast Pass','Acceso rápido'),'p2','tierTotal2','kill2','hold2','comp2','sell2'],['GA '+L('全价票','Standard','General'),'p3','tierTotal3','kill3','hold3','comp3','sell3']].map((r,n)=>{const y=292+n*48;return `${T(57,y+27,r[0],'row')}${V(300,y+27,r[1],'input','end',[225,y+7,82,26])}${V(407,y+27,r[2],'input','end',[340,y+7,74,26])}${V(492,y+27,r[3],'input','end',[440,y+7,59,26])}${V(576,y+27,r[4],'input','end',[524,y+7,59,26])}${V(660,y+27,r[5],'input','end',[608,y+7,59,26])}${V(759,y+27,r[6],'input','end',[692,y+7,74,26])}${Ln(45,y+46,778,y+46)}`;}).join('');
+    return `${section(3,steps[2])}${R(22,177,1187,510,'#fff','#2d3a8c',10)}${R(22,177,1187,53,'#f0f3ff','#2d3a8c',10)}${Tag(42,191,105,'2027/07/08')}${T(160,211,L('演出日：广州 · 广州声音共和 ROS Livehouse','Show: Guangzhou · ROS Livehouse','Show: Cantón · ROS Livehouse'),'showtitle')}${V(1170,211,'cap','showcap','end',[1085,192,88,24])}
+      ${T(45,258,L('票档名称','Ticket tier','Categoría'),'th')}${T(300,258,L('单价 (CNY)','Price (CNY)','Precio (CNY)'),'th','end')}${T(407,258,L('总票数','Total','Total'),'th','end')}${T(492,258,L('封票','Kills','Bloqueadas'),'th','end')}${T(576,258,L('预留','Holds','Reservadas'),'th','end')}${T(660,258,L('赠票','Comps','Invitaciones'),'th','end')}${T(759,258,L('可售','Sellable','Disponibles'),'th','end')}${Ln(45,272,778,272,'#d6dcf0',1.5)}${rows}
+      ${R(43,455,738,47,'#f0f4ff','#bdc9f4',6)}${T(60,484,L('各档总票数合计','Tier total','Total de categorías'),'row strong')}${V(293,484,'cap','val','end',[216,462,84,27])}${T(311,484,'/ '+L('总容量','Capacity','Aforo'),'row')}${V(425,484,'cap','val','end',[347,462,84,27])}${T(461,484,L('可售合计','Sellable total','Total disponible'),'row')}${V(584,484,'sell','val','end',[508,462,83,27])}
+      ${T(836,258,L('票房与其他营业收入','Box office and other operating revenue','Taquilla y otros ingresos operativos'),'cardtitle')}${R(817,272,367,354,'#fbfcff','#d7def0',8)}
+      ${T(838,303,L('总票房（含税）','Gross box office','Taquilla bruta'),'row')}${V(1164,303,'gross','money','end',[1018,283,150,26])}${Ln(838,316,1164,316)}
+      ${T(838,343,L('综合票房预估扣点','Estimated deduction','Deducción estimada'),'row')}${V(1164,343,'deduct','money','end',[1018,323,150,26])}${Ln(838,356,1164,356)}
+      ${T(838,383,L('净票房','Net box office','Taquilla neta'),'row strong')}${V(1164,383,'net','money','end',[1018,363,150,26])}${Ln(838,397,1164,397,'#c7d2fe',1.5)}
+      ${T(838,428,L('净赞助','Net sponsorship','Patrocinio neto'),'row')}${R(1026,407,138,29,'#fff','#c7d2fe',5)}${V(1154,427,'sponsor','input','end',[1032,411,126,22])}${Ln(838,443,1164,443)}
+      ${T(838,474,L('主办周边净收入','Promoter net merchandise income','Ingreso neto de merchandising'),'row')}${R(1026,453,138,29,'#fff','#c7d2fe',5)}${V(1154,473,'merch','input','end',[1032,457,126,22])}${Ln(838,489,1164,489)}
+      ${T(838,532,L('净营业收入合计 (NOR)','Net operating revenue (NOR)','Ingreso operativo neto (NOR)'),'row strong')}${V(1164,532,'nor','money strong','end',[1018,512,150,26])}`;
+  };
+
+  const s4=()=>{
+    const costRows=[
+      [L('场地租金（含 LED）','Venue rental (incl. LED)','Alquiler (incl. LED)'),L('直接成本','Direct','Directo'),'rent'],
+      [L('文化报批许可证','Culture permit','Permiso cultural'),L('直接成本','Direct','Directo'),'permit'],
+      [L('安保（公安）','Security / police','Seguridad / policía'),L('直接成本','Direct','Directo'),'police'],
+      [L('手环','Wristbands','Pulseras'),L('可变成本','Variable','Variable'),'wrist']
+    ].map((r,n)=>{const y=292+n*42;return `${T(48,y+26,r[0],'row')}${Tag(338,y+10,82,r[1],n===3?'orange':'blue')}${Tag(438,y+10,76,L('主办方','Promoter','Promotor'),'green')}${R(790,y+8,100,28,'#fff','#c7d2fe',5)}${R(905,y+8,74,28,'#fff','#c7d2fe',5)}${V(1158,y+27,r[2],'money','end',[1031,y+9,132,26])}${Ln(43,y+40,1172,y+40)}`;}).join('');
+    const hotelRows=[[L('艺人本人酒店','Artist hotel','Hotel artista'),'hotelArtist'],[L('艺人乐队酒店','Band hotel','Hotel banda'),'hotelBand']].map((r,n)=>{const y=557+n*40;return `${T(48,y+25,r[0],'row')}${Tag(338,y+9,82,L('直接成本','Direct','Directo'))}${Tag(438,y+9,76,L('主办方','Promoter','Promotor'),'green')}${R(790,y+7,100,28,'#fff','#c7d2fe',5)}${R(905,y+7,74,28,'#fff','#c7d2fe',5)}${V(1158,y+26,r[1],'money','end',[1031,y+8,132,26])}${Ln(43,y+39,1172,y+39)}`;}).join('');
+    return `${section(4,steps[3])}${Tag(25,178,110,L('广州 · 07/08','Guangzhou · 07/08','Cantón · 07/08'))}${Tag(143,178,108,L('深圳 · 07/09','Shenzhen · 07/09','Shenzhen · 07/09'))}${Tag(259,178,105,L('武汉 · 07/11','Wuhan · 07/11','Wuhan · 07/11'))}
+      ${R(22,210,1187,283)}${T(42,241,L('场地与政府','Venue & government','Recinto y gobierno'),'cardtitle')}${V(1170,241,'costGroup','money','end',[1034,221,140,25])}
+      ${T(48,273,L('项目','Item','Concepto'),'th')}${T(338,273,L('分类','Class','Clase'),'th')}${T(438,273,L('责任方','Responsibility','Responsable'),'th')}${T(840,273,L('单价','Unit price','Precio'),'th','middle')}${T(942,273,L('数量','Qty','Cant.'),'th','middle')}${T(1158,273,L('¥ 金额','¥ Amount','¥ Importe'),'th','end')}${Ln(42,280,1172,280,'#cbd5ee',1.5)}${costRows}
+      ${R(22,508,1187,166)}${T(42,539,L('本地酒店','Local hotel','Hotel local'),'cardtitle')}${Tag(170,522,61,L('合住','Share','Compartir'))}${Tag(239,522,76,L('同档次','Same tier','Misma gama'))}${R(328,522,110,25,'#fff','#c7d2fe',5)}${T(383,539,L('中端','Mid-range','Media'),'input','middle')}${T(840,539,L('单价','Unit price','Precio'),'th','middle')}${T(942,539,L('数量','Qty','Cant.'),'th','middle')}${T(1158,539,L('¥ 金额','¥ Amount','¥ Importe'),'th','end')}${Ln(42,547,1172,547,'#cbd5ee',1.5)}${hotelRows}`;
+  };
+
+  const s5=()=>{
+    const left=[[L('场地容量 / 可售票数','Capacity / sellable','Aforo / disponibles'),'capSell'],[L('总票房（含税）','Gross box office','Taquilla bruta'),'gross'],[L('综合票房预估扣点','Estimated deduction','Deducción estimada'),'deduct'],[L('净票房','Net box office','Taquilla neta'),'net'],[L('净营业收入合计 (NOR)','Net operating revenue (NOR)','Ingreso operativo neto (NOR)'),'nor']];
+    const right=[[L('直接项目成本','Direct project cost','Coste directo'),'direct'],[L('毛利润 / 毛利率','Gross profit / margin','Beneficio bruto / margen'),'grossProfit'],[L('间接费用','Indirect expenses','Gastos indirectos'),'indirect'],[L('本场艺人费用','Artist fee','Honorarios del artista'),'artistFee'],[L('本场税前利润','Pre-tax profit','Beneficio antes de impuestos'),'preTax']];
+    const pnl=(arr,x,w)=>arr.map((r,n)=>{const y=257+n*35;return `${T(x,y,r[0],n===4?'row strong':'row')}${V(x+w,y,r[1],n===4?'money strong':'money','end',[x+w-148,y-19,152,25])}${Ln(x,y+10,x+w,y+10,n===4?'#c7d2fe':'#e6e8f2',n===4?1.5:1)}`;}).join('');
+    const sens=[['60%','sens60'],[L('78% · 预期','78% · Expected','78% · Previsto'),'sens78'],['100%','sens100']].map((r,n)=>{const y=581+n*29;return `${T(56,y,r[0],n===1?'row strong':'row')}${V(500,y,r[1],'money','end',[348,y-18,157,24])}${V(750,y,n===0?'nor60':n===1?'nor78':'nor100','money','end',[598,y-18,157,24])}${Ln(44,y+9,778,y+9)}`;}).join('');
+    return `${section(5,steps[4])}${R(22,177,1187,501,'#fafbff','#2d3a8c',10)}${R(22,177,1187,52,'#eef2ff','#2d3a8c',10)}${T(42,210,L('本场 P&L · 广州 · 广州声音共和 ROS Livehouse','Show P&L · Guangzhou · ROS Livehouse','P&L del show · Cantón · ROS Livehouse'),'showtitle')}${T(1170,210,L('满场 100%','Full house 100%','Aforo completo 100%'),'note','end')}
+      ${R(42,243,548,193,'#fff','#dfe3f0',7)}${R(608,243,575,193,'#fff','#dfe3f0',7)}${pnl(left,58,510)}${pnl(right,624,537)}
+      ${R(22,449,1187,45,'#eef2ff','#d6dcf0',0)}${T(42,478,L('演出 OFFER × 票房敏感性','Show OFFER × ticket sensitivity','OFFER × sensibilidad de taquilla'),'offertitle')}
+      ${Tag(42,509,180,L('纯保底','Flat Guarantee','Caché fijo'))}${Tag(231,509,180,L('保底＋分成','Guarantee + Backend','Caché + participación'),'green')}${Tag(420,509,180,L('纯分成','Door Deal','Solo taquilla'))}
+      ${R(817,509,366,145,'#fff','#cbd5f4',8)}${T(837,536,L('当前保底','Current guarantee','Caché actual'),'label')}${V(1162,538,'guarantee','money strong','end',[1009,518,157,25])}${Ln(837,550,1162,550)}${T(837,578,L('本场目标利润率','Show target margin','Margen objetivo'),'row')}${T(1162,578,'40.0%','money','end')}${T(837,612,L('建议保底','Suggested guarantee','Caché sugerido'),'row strong')}${V(1162,612,'suggested','money strong','end',[1009,592,157,25])}
+      ${T(42,560,L('本城预计售出率','Expected sales rate','Venta prevista'),'th')}${T(500,560,L('税前利润率 / 税前利润','Pre-tax margin / profit','Margen / beneficio'),'th','end')}${T(750,560,'NOR','th','end')}${sens}`;
+  };
+
+  const s6=()=>{
+    const tabs=[L('预算总览','Budget overview','Resumen de presupuesto'),L('现金流','Cash flow','Flujo de caja'),L('巡演路线','Tour routing','Ruta'),L('Memo','Memo','Memo'),L('关键时间点','Key dates','Fechas clave')].map((a,n)=>Tag(30+n*142,178,132,a,n===0?'blue':'plain')).join('');
+    const summary=[[L('巡演净营业收入','Tour NOR','NOR de la gira'),'tourNor'],[L('巡演总成本','Tour total cost','Coste total'),'tourCost'],[L('巡演税后净利润','After-tax net profit','Beneficio neto'),'tourNet'],[L('巡演税后净利率','After-tax margin','Margen neto'),'tourMargin']].map((r,n)=>{const x=40+n*280;return `${R(x,230,258,70,n===3?'#eef2ff':'#fff',n===3?'#b7c0f4':'#dfe3f0',7)}${T(x+14,253,r[0],'label')}${V(x+244,283,r[1],n===3?'kpi green':'kpi','end',[x+92,258,156,30])}`;}).join('');
+    const cols=[{x:43,w:213,t:L('项目','Item','Concepto')},{x:256,w:150,t:L('巡演 TOTAL','TOUR TOTAL','TOTAL GIRA')},{x:406,w:135,t:L('城市均值','City avg','Media ciudad')},{x:541,w:130,t:L('广州','Guangzhou','Cantón')},{x:671,w:130,t:L('深圳','Shenzhen','Shenzhen')},{x:801,w:130,t:L('武汉','Wuhan','Wuhan')},{x:931,w:130,t:L('北京','Beijing','Pekín')},{x:1061,w:120,t:L('杭州','Hangzhou','Hangzhou')}];
+    let table=cols.map(c=>`${R(c.x,331,c.w,35,'#eef2ff','#d6dcf0',0)}${T(c.x+c.w/2,353,c.t,'tblhead','middle')}`).join('');
+    const rr=[[L('场地容量','Capacity','Aforo'),'s6Cap'],[L('可售票数','Sellable','Disponibles'),'s6Sell'],[L('售出张数','Sold','Vendidas'),'s6Sold'],[L('上座率','Sales rate','Ocupación'),'s6Occ'],[L('总票房','Gross box office','Taquilla bruta'),'s6Gross'],['NOR','tourNor'],[L('直接成本','Direct cost','Coste directo'),'s6Direct'],[L('艺人费用','Artist fee','Honorarios'),'s6Artist'],[L('税后净利润','After-tax net profit','Beneficio neto'),'tourNet']];
+    rr.forEach((r,n)=>{const y=366+n*32,vals=(D.s6Rows&&D.s6Rows[n])||[];cols.forEach((c,k)=>{table+=R(c.x,y,c.w,32,n%2?'#fbfcff':'#fff','#e3e6f0',0);if(k===0)table+=T(c.x+10,y+21,r[0],n===8?'row strong':'row');else table+=T(c.x+c.w-10,y+21,vals[k-1]==null?'—':vals[k-1],n===8?'money strong':'cellval','end',[c.x+7,y+5,c.w-14,23]);});});
+    return `${section(6,steps[5])}${tabs}${R(22,216,1187,484)}${T(40,224,L('巡演利润结构','Tour profit structure','Estructura de beneficio'),'cardtitle')}${summary}${T(40,322,L('巡演汇总','Tour summary','Resumen de gira'),'cardtitle')}${table}`;
+  };
+
+  const s1Style=i===0?`.s1-eval-results{opacity:0;animation:s1EvalResults 8s infinite}.s1-eval-click{animation:s1EvalClick 8s infinite}@keyframes s1EvalResults{0%,34%{opacity:0}40%,100%{opacity:1}}@keyframes s1EvalClick{0%,24%,46%,100%{fill:#eef2ff}30%,39%{fill:#dfe6ff}}`:'';
+  const bodies=[s1,s2,s3,s4,s5,s6];
+  const body=bodies[Math.max(0,Math.min(5,i))]();
+  const svg=`<svg xmlns="http://www.w3.org/2000/svg" width="1265" height="586" viewBox="0 126 1265 586"><defs>${defs.join('')}</defs><style>
+    text{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Microsoft YaHei',Arial,sans-serif}.secnum{font-size:12px;font-weight:800;fill:#fff}.sectitle{font-size:18px;font-weight:800;fill:#24357f}.cardtitle{font-size:14px;font-weight:800;fill:#2d3a8c}.showtitle{font-size:13px;font-weight:800;fill:#293451}.offertitle{font-size:14px;font-weight:800;fill:#2d3a8c}.label,.th{font-size:10px;font-weight:700;fill:#737d93}.note{font-size:9px;fill:#8a93a8}.input{font-size:11px;fill:#35405a}.row{font-size:10px;fill:#4c556c}.row.strong,.strong{font-weight:800;fill:#2d3a8c}.muted{fill:#8a93a8}.val,.money,.cellval{font-size:11px;font-weight:700;fill:#293b8f}.money{font-variant-numeric:tabular-nums}.tag{font-size:9px;font-weight:700;fill:#2d3a8c}.btn{font-size:9px;font-weight:700;fill:#2d3a8c}.month{font-size:14px;font-weight:800;fill:#293b8f}.calhead{font-size:10px;font-weight:800;fill:#68738c}.calday{font-size:10px;font-weight:700;fill:#3f4962}.caltype{font-size:8px;font-weight:700;fill:#4a5368}.calcity{font-size:8px;fill:#7c8599}.legend{font-size:9px;fill:#636d82}.showcap{font-size:10px;font-weight:700;fill:#5d6780}.kpi{font-size:17px;font-weight:800;fill:#2d3a8c}.green{fill:#168553}.tblhead{font-size:8px;font-weight:800;fill:#2d3a8c}.cellval{font-size:8px}.mask{filter:url(#landingPublicBlur);opacity:.86}.plain{fill:#fff}.s2-type-modal,.s2-show-modal,.s2-city-empty,.s2-city-value,.s2-venue-empty,.s2-venue-value,.s2-final{opacity:0}.s2-type-modal{animation:s2Type 10s infinite}.s2-show-modal{animation:s2Show 10s infinite}.s2-city-empty{animation:s2CityEmpty 10s infinite}.s2-city-value{animation:s2CityValue 10s infinite}.s2-venue-empty{animation:s2VenueEmpty 10s infinite}.s2-venue-value{animation:s2VenueValue 10s infinite}.s2-final{animation:s2Final 10s infinite}@keyframes s2Type{0%,14%,34%,100%{opacity:0}17%,31%{opacity:1}}@keyframes s2Show{0%,32%,76%,100%{opacity:0}35%,73%{opacity:1}}@keyframes s2CityEmpty{0%,32%,45%,100%{opacity:0}35%,42%{opacity:1}}@keyframes s2CityValue{0%,43%,76%,100%{opacity:0}46%,73%{opacity:1}}@keyframes s2VenueEmpty{0%,32%,59%,100%{opacity:0}35%,56%{opacity:1}}@keyframes s2VenueValue{0%,57%,76%,100%{opacity:0}60%,73%{opacity:1}}@keyframes s2Final{0%,74%,100%{opacity:0}78%,98%{opacity:1}}${s1Style}
+  </style><rect width="1265" height="712" fill="#f4f6fb"/>${body}</svg>`;
+  return 'data:image/svg+xml;charset=utf-8,'+encodeURIComponent(svg);
+}
+
 function renderLandingWorkflow(){
   const root=document.getElementById('landing-six-step-preview');
   if(!root) return;
@@ -11168,30 +11407,42 @@ function renderLandingWorkflow(){
     [Lz('损益结果','P&L result','Resultado P&L'),Lz('图示：S5 按本场预计售出率和本场税前利润率目标反推 OFFER。*','Figure: S5 solves the OFFER from expected show sales and the show pre-tax margin target.*','Figura: S5 calcula la oferta desde la venta prevista y el objetivo de margen antes de impuestos del show.*')],
     [Lz('巡演方案汇总','Tour Plan Summary','Resumen del plan de gira'),Lz('图示：S6 汇总综合收益税费，并明确展示巡演净利润与巡演税后净利率。*','Figure: S6 consolidates comprehensive earnings tax expense and explicitly shows tour net profit and after-tax net margin.*','Figura: S6 consolida el impuesto integral y muestra el beneficio neto y el margen después de impuestos de la gira.*')]
   ];
-  // 331施工版重新生成六步预览：用当前三语口径绘制为单文件内嵌SVG，彻底替换旧截图中的8%与旧利润结构。
-  const framePreviewData=[
-    {title:Lz('项目信息 · The Sold Outs 2027 China Tour','Project information · The Sold Outs 2027 China Tour','Información del proyecto · The Sold Outs 2027 China Tour'),sub:Lz('项目、票档、人员与城市库存','Project, ticket tiers, people and city inventory','Proyecto, entradas, equipo e inventario por ciudad'),kpis:[[Lz('演出城市','Show cities','Ciudades'),'8'],[Lz('艺人团队','Artist party','Equipo artístico'),'12'],[Lz('巡演团队','Tour crew','Equipo de gira'),'6']],rows:[[Lz('票档','Ticket tier','Categoría'),Lz('票价','Price','Precio'),Lz('可售库存','Sellable','Vendibles')],['VIP','§¥760','§180'],[Lz('全价票','Standard','General'),'§¥460','§640'],[Lz('早鸟票','Early bird','Anticipada'),'§¥320','§340'],[Lz('城市库存检查','City inventory check','Revisión por ciudad'),'§Capacity 1,280','§Sellable 1,160']],rail:[[Lz('机会档案','Opportunity','Oportunidad'),Lz('已完成','Complete','Completo')],[Lz('团队评估','Team assessment','Evaluación'),'3.86'],[Lz('建议预期上座率','Suggested occupancy','Ocupación sugerida'),'78%']]},
-    {title:Lz('演出规划 · 巡演日历','Show planning · Tour calendar','Planificación · Calendario de gira'),sub:Lz('逐日安排演出日与行程日','Schedule show and travel days','Programa shows y días de viaje'),kpis:[[Lz('演出日','Show days','Días de show'),'8'],[Lz('行程日','Travel days','Días de viaje'),'7'],[Lz('总行程','Total span','Duración'),'15 '+Lz('天','days','días')]],rows:[[Lz('日期','Date','Fecha'),Lz('活动','Activity','Actividad'),Lz('城市 / 路线','City / route','Ciudad / ruta')],['2027-07-06',Lz('落地','Arrival','Llegada'),Lz('广州','Guangzhou','Cantón')],['2027-07-07',Lz('试音','Soundcheck','Prueba'),Lz('广州','Guangzhou','Cantón')],['2027-07-08',Lz('演出','Show','Show'),Lz('广州 · MAO','Guangzhou · MAO','Cantón · MAO')],['2027-07-09',Lz('移动','Travel','Viaje'),Lz('广州 → 深圳','Guangzhou → Shenzhen','Cantón → Shenzhen')],['2027-07-10',Lz('演出','Show','Show'),Lz('深圳 · HOU LIVE','Shenzhen · HOU LIVE','Shenzhen · HOU LIVE')]],rail:[[Lz('共享酒店','Shared hotel','Hotel compartido'),Lz('按人员拆分','Split by people','Por personas')],[Lz('直接成本','Direct','Directo'),'§¥48,620'],[Lz('间接费用','Indirect','Indirecto'),'§¥12,840']]},
-    {title:Lz('演出收益 · 广州','Show revenue · Guangzhou','Ingresos del show · Cantón'),sub:Lz('Sold 始终按 Sellable × %Sold','Sold always equals Sellable × %Sold','Sold siempre = Sellable × %Sold'),kpis:[['Capacity','§1,280'],['Sellable','§1,160'],['%Sold','95%'],['Sold','§1,102']],rows:[[Lz('票档','Ticket tier','Categoría'),Lz('实际售出','Sold','Vendidas'),Lz('含税票房','Gross receipts','Taquilla bruta')],['VIP','§176','§¥133,760'],[Lz('全价票','Standard','General'),'§618','§¥284,280'],[Lz('早鸟票','Early bird','Anticipada'),'§308','§¥98,560'],[Lz('综合票房预估扣点','Estimated box-office deduction','Deducción estimada'),'7%','§−¥36,162'],[Lz('净票房','Net box office','Taquilla neta'),'','§¥480,438']],rail:[[Lz('库存约束','Inventory guard','Control de inventario'),'Sold ≤ Sellable'],[Lz('净票房口径','Net box-office basis','Base de taquilla neta'),Lz('仅扣7%预估扣点','7% deduction only','Solo deducción del 7%')],[Lz('回本分母','Breakeven denominator','Denominador equilibrio'),'Capacity']]},
-    {title:Lz('演出成本 · 上海','Show costs · Shanghai','Costes del show · Shanghái'),sub:Lz('固定分类标签与承担方分开管理','Fixed class tags, separate responsibility','Clase fija y responsable separados'),kpis:[[Lz('直接项目成本','Direct project cost','Coste directo'),'§¥186,420'],[Lz('间接费用','Indirect expenses','Gastos indirectos'),'§¥54,680'],[Lz('未分类','Unclassified','Sin clasificar'),'§¥0']],rows:[[Lz('成本项目','Cost item','Partida'),Lz('固定分类','Fixed class','Clase fija'),Lz('承担方','Responsible','Responsable')],[Lz('场地租金（含 LED）','Venue rental (incl. LED)','Alquiler (incl. LED)'),Lz('直接成本','Direct','Directo'),Lz('主办','Promoter','Promotor')],[Lz('艺人乐队酒店','Artist / band hotel','Hotel artista / banda'),Lz('直接成本','Direct','Directo'),Lz('主办','Promoter','Promotor')],[Lz('数字广告','Digital advertising','Publicidad digital'),Lz('间接费用','Indirect','Indirecto'),Lz('主办','Promoter','Promotor')],[Lz('票务佣金','Ticket commission','Comisión de ticketing'),Lz('间接费用','Indirect','Indirecto'),Lz('主办','Promoter','Promotor')],[Lz('历史未知金额','Legacy unknown amount','Importe histórico incierto'),Lz('未分类','Unclassified','Sin clasificar'),Lz('主办','Promoter','Promotor')]],rail:[[Lz('分类守恒','Classification control','Control de clasificación'),Lz('金额不丢失','No amount lost','Sin pérdida')],[Lz('艺人承担','Artist-borne','A cargo del artista'),Lz('不进主办损益','Excluded','Excluido')],[Lz('场馆承担','Venue-borne','A cargo del recinto'),Lz('不进主办损益','Excluded','Excluido')]]},
-    {title:Lz('损益结果 · OFFER × 票房敏感性','P&L · OFFER × ticket sensitivity','P&L · OFFER × sensibilidad de taquilla'),sub:Lz('按本场预计售出率与税前利润率目标反推','Offer solved from expected show sales and pre-tax margin target','Oferta según venta prevista y margen antes de impuestos'),kpis:[[Lz('本城净营业收入（NOR）','City Net Operating Revenue (NOR)','Ingresos operativos netos de la ciudad (NOR)'),'§¥642,180'],[Lz('本城毛利润','City gross profit','Beneficio bruto'),'§¥455,760'],[Lz('本场税前利润率目标','Show pre-tax margin target','Objetivo de margen antes de impuestos'),'40.0%'],[Lz('盈亏平衡','Breakeven','Equilibrio'),'§618 / 61.8%']],rows:[[Lz('本城预计售出率','Expected sales rate','Tasa de venta prevista'),Lz('税前利润率 / 税前利润','Pre-tax margin / profit','Margen / beneficio antes de impuestos'),Lz('本城净营业收入（NOR）','City Net Operating Revenue (NOR)','Ingresos operativos netos de la ciudad (NOR)')],['60%','§18.6% / ¥74,260','§¥468,210'],[Lz('78% · 预期','78% · Expected','78% · Previsto'),'§36.8% / ¥184,620','§¥642,180'],['100%','§49.6% / ¥326,840','§¥826,410'],[Lz('建议保底','Suggested guarantee','Caché sugerido'),'§¥248,610',Lz('按本场目标','Show target','Objetivo show')]],rail:[[Lz('S5口径','S5 basis','Base S5'),Lz('本场税前','Show pre-tax','Show antes de impuestos')],[Lz('目标利润率','Target margin','Margen objetivo'),'40.0%'],[Lz('最终检查','Final check','Comprobación final'),Lz('S6巡演税后','S6 tour after-tax','S6 gira neta')]]},
-    {title:Lz('巡演方案汇总 · 预算总览','Tour Plan Summary · Budget Overview','Resumen del plan de gira · Resumen del presupuesto'),sub:Lz('综合收益税费与净利润指标只在巡演总计展示','Comprehensive earnings tax expense and net metrics appear only at tour total','El impuesto integral y los indicadores netos solo aparecen en el total'),kpis:[[Lz('巡演 NOR','Tour NOR','NOR de gira'),'§¥4,286,420'],[Lz('巡演净利润','Tour net profit','Beneficio neto de gira'),'§¥1,684,260'],[Lz('巡演税后净利率','Tour after-tax net margin','Margen neto de gira después de impuestos'),'§36.8%'],[Lz('净 ROI','Net ROI','ROI neto'),'§84.6%']],rows:[[Lz('巡演成本结构与利润率','Tour Cost Structure & Margins','Estructura de costes y márgenes de la gira'),Lz('金额','Amount','Importe'),Lz('占 NOR','of NOR','de NOR')],[Lz('直接项目成本','Direct project cost','Coste directo'),'§¥824,680','§19.2%'],[Lz('间接费用','Indirect expenses','Gastos indirectos'),'§¥368,240','§8.6%'],[Lz('艺人费用','Artist fee','Coste del artista'),'§¥928,640','§21.7%'],[Lz('综合收益税费','Comprehensive earnings tax expense','Impuesto integral sobre beneficios'),'§¥746,820','§17.4%'],[Lz('巡演净利润 / 巡演税后净利率','Tour net profit / after-tax net margin','Beneficio neto / margen después de impuestos'),'§¥1,684,260 / 36.8%','']],rail:[[Lz('城市列','City columns','Columnas ciudad'),Lz('税后指标显示 —','After-tax metrics show —','Indicadores netos —')],[Lz('S6口径','S6 basis','Base S6'),Lz('巡演合并税后','Tour consolidated after-tax','Gira consolidada neta')],[Lz('Excel / 报告','Excel / report','Excel / informe'),Lz('同一汇总模型','Same summary model','Mismo modelo')]]}
+  const highlights=[
+    Lz('一键提取项目信息并自动归位；团队共同评估票房潜力，减少拍脑袋决策。','Extract project information in one click and place it automatically; assess box-office potential as a team to reduce gut-feel decisions.','Extrae y ubica automáticamente la información del proyecto; evalúa en equipo el potencial de taquilla para reducir decisiones intuitivas.'),
+    Lz('日历化规划演出与行程，自动带出场馆主要费用，无需翻找零散资料。','Plan shows and travel in a calendar and automatically pull key venue costs, without hunting through scattered files.','Planifica shows y viajes en el calendario y carga automáticamente los principales costes del recinto, sin buscar en archivos dispersos.'),
+    Lz('票房、赞助与周边收入集中测算，收入结构与NOR实时联动。','Model ticketing, sponsorship and merchandise income in one place, with revenue mix and NOR updating in real time.','Calcula taquilla, patrocinio y merchandising en un solo lugar, con la estructura de ingresos y el NOR actualizados en tiempo real.'),
+    Lz('主要成本自动带出，其他费用灵活微调；分类清晰、责任明确。','Pull in major costs automatically and fine-tune other expenses as needed, with clear categories and ownership.','Carga automáticamente los costes principales y ajusta los demás con flexibilidad, con categorías y responsabilidades claras.'),
+    Lz('以目标利润率反推艺人费用，票房与利润实时联动，提前看清风险和报价边界。','Work back from the target margin to the artist fee, linking box office and profit live to reveal risk and offer limits early.','Calcula el caché desde el margen objetivo y vincula taquilla y beneficio en tiempo real para anticipar riesgos y límites de oferta.'),
+    Lz('内外部信息一站汇总、一键导出并跟踪联络状态，高效推进协作与洽谈。','Bring internal and external information into one place, export it in one click and track outreach status to move collaboration and negotiations forward efficiently.','Reúne la información interna y externa, expórtala con un clic y sigue el contacto para agilizar la colaboración y la negociación.')
   ];
-  function landingFramePreview(i){
-    const d=framePreviewData[i],masked=v=>String(v==null?'':v).startsWith('§'),plain=v=>String(v==null?'':v).replace(/^§/,''),xml=v=>plain(v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'),cls=(v,base)=>base+(masked(v)?' mask':'');
-    const nav=finalFrameMeta.map((m,n)=>`<g><circle cx="${40+n*155}" cy="91" r="10" fill="${n===i?'#33449a':'#e1e6f4'}"/><text x="${40+n*155}" y="95" text-anchor="middle" class="tiny" fill="${n===i?'#fff':'#667085'}">${n+1}</text><text x="${58+n*155}" y="96" class="nav ${n===i?'active':''}">${xml(m[0])}</text></g>`).join('');
-    const kpis=d.kpis.map((p,n)=>{const x=42+n*(820/Math.max(1,d.kpis.length));return `<g><rect x="${x}" y="216" width="${790/Math.max(1,d.kpis.length)}" height="72" rx="9" fill="#f7f8fc" stroke="#e0e4ef"/><text x="${x+14}" y="240" class="small">${xml(p[0])}</text><text x="${x+14}" y="270" class="${cls(p[1],'kpi')}">${xml(p[1])}</text></g>`;}).join('');
-    const rows=d.rows.map((r,n)=>{const y=330+n*48,head=n===0;return `<g><rect x="42" y="${y-25}" width="820" height="44" rx="${head?7:0}" fill="${head?'#33449a':n%2?'#fff':'#f8f9fc'}" stroke="${head?'#33449a':'#e4e7ef'}"/><text x="58" y="${y+2}" class="${cls(r[0],head?'thead':'row')}">${xml(r[0])}</text><text x="420" y="${y+2}" class="${cls(r[1],head?'thead':'row')}">${xml(r[1])}</text><text x="680" y="${y+2}" class="${cls(r[2],head?'thead':'row value')}">${xml(r[2])}</text></g>`;}).join('');
-    const rail=d.rail.map((r,n)=>{const y=238+n*112;return `<g><rect x="910" y="${y-32}" width="310" height="88" rx="10" fill="#fff" stroke="#dfe3ef"/><text x="930" y="${y-4}" class="small">${xml(r[0])}</text><text x="930" y="${y+29}" class="${cls(r[1],'rail')}">${xml(r[1])}</text></g>`;}).join('');
-    const svg=`<svg xmlns="http://www.w3.org/2000/svg" width="1265" height="712" viewBox="0 0 1265 712"><defs><filter id="publicBlur" x="-15%" y="-30%" width="130%" height="160%"><feGaussianBlur stdDeviation="3.2"/></filter></defs><style>text{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Microsoft YaHei',Arial,sans-serif}.brand{font-size:16px;font-weight:800;fill:#fff}.top{font-size:12px;fill:#d8def8}.nav{font-size:12px;font-weight:700;fill:#68738c}.nav.active{fill:#263a8c}.tiny{font-size:9px;font-weight:800}.title{font-size:24px;font-weight:800;fill:#263675}.sub{font-size:13px;fill:#7b849b}.small{font-size:12px;fill:#778198}.kpi{font-size:22px;font-weight:800;fill:#283a91}.thead{font-size:11px;font-weight:700;fill:#fff}.row{font-size:12px;fill:#4d566c}.value{font-weight:750;fill:#263a8c}.rail{font-size:17px;font-weight:800;fill:#2b3d93}.foot{font-size:11px;fill:#8a93a8}.mask{filter:url(#publicBlur);opacity:.8}</style><rect width="1265" height="712" fill="#f3f5fa"/><rect width="1265" height="58" fill="#2f408e"/><text x="28" y="35" class="brand">The Sold Outs 2027 China Tour　DEMO</text><text x="900" y="35" class="top mask">¥8.42/USD　 ${xml(Lz('综合票房预估扣点 6%　综合收益税负 28%','Estimated deduction 6%　Earnings tax burden 28%','Deducción 6%　Carga fiscal integral 28%'))}</text><rect y="58" width="1265" height="66" fill="#fff"/>${nav}<rect x="24" y="142" width="860" height="544" rx="13" fill="#fff" stroke="#dce1ed"/><text x="42" y="176" class="title">${xml(d.title)}</text><text x="42" y="200" class="sub">${xml(d.sub)}</text>${kpis}${rows}<rect x="896" y="142" width="344" height="544" rx="13" fill="#f8f9fd" stroke="#dce1ed"/><text x="916" y="176" class="title" style="font-size:17px">${xml(Lz('实时摘要','Live summary','Resumen en vivo'))}</text>${rail}<text x="916" y="654" class="foot">${xml(Lz('所有金额为模糊示意 · 当前331口径','Blurred illustrative figures · current 331 model','Cifras ilustrativas difuminadas · modelo 331 actual'))}</text></svg>`;
-    return 'data:image/svg+xml;charset=utf-8,'+encodeURIComponent(svg);
-  }
-  frames.forEach((frame,i)=>{frame.label=finalFrameMeta[i][0];frame.alt=finalFrameMeta[i][0];frame.caption=finalFrameMeta[i][1];frame.src=landingFramePreview(i);});
+  // 六步预览由当前三语口径的真实系统组件即时绘制。
+  const realPreviewData={
+    rate:'§¥7.06/USD · 票房扣点 6% · 综合税负 29%',p1:'§¥760',p2:'§¥460',p3:'§¥320',evalArtist:'§3.86 / 5',evalCity:'§3.92 / 5',evalOcc:'§78%',
+    cap:'§1,280',sell:'§1,145',capSell:'§1,280张 / 1,145张',tierTotal1:'§80',tierTotal2:'§125',tierTotal3:'§1,075',
+    kill1:'§0',kill2:'§25',kill3:'§55',hold1:'§0',hold2:'§0',hold3:'§30',comp1:'§0',comp2:'§0',comp3:'§25',sell1:'§80',sell2:'§100',sell3:'§965',
+    gross:'§¥612,480',deduct:'§−¥36,749',net:'§¥575,731',sponsor:'§¥0',merch:'§¥0',nor:'§¥575,731',
+    rent:'§¥58,600',permit:'§¥4,200',police:'§¥4,500',wrist:'§¥307',costGroup:'§¥67,607',hotelArtist:'§¥860',hotelBand:'§¥860',
+    direct:'§−¥116,900',grossProfit:'§¥458,831 / 79.7%',indirect:'§−¥31,480',artistFee:'§−¥156,000',preTax:'§¥271,351 / 47.1%',
+    guarantee:'§¥156,000',suggested:'§¥179,600',sens60:'§21.8% / ¥94,620',sens78:'§40.0% / ¥201,340',sens100:'§53.6% / ¥328,510',nor60:'§¥402,680',nor78:'§¥575,731',nor100:'§¥731,240',
+    tourNor:'§¥3,904,280',tourCost:'§−¥1,784,960',tourNet:'§¥1,247,880',tourMargin:'§39.6%',
+    s6Rows:[
+      ['§11,820','§1,478','§1,280','§1,100','§920','§1,760','§1,250'],
+      ['§10,640','§1,330','§1,145','§980','§830','§1,580','§1,115'],
+      ['§8,721','§1,090','§996','§802','§760','§1,112','§914'],
+      ['§82.0%','§82.0%','§87.0%','§81.8%','§91.6%','§70.4%','§82.0%'],
+      ['§¥4,161,320','§¥520,165','§¥612,480','§¥498,710','§¥387,260','§¥511,840','§¥469,770'],
+      ['§¥3,904,280','§¥488,035','§¥575,731','§¥468,788','§¥364,024','§¥481,130','§¥441,584'],
+      ['§−¥1,068,740','§−¥133,593','§−¥116,900','§−¥128,540','§−¥105,420','§−¥149,360','§−¥119,880'],
+      ['§−¥1,248,000','§−¥156,000','§−¥156,000','§−¥156,000','§−¥156,000','§−¥156,000','§−¥156,000'],
+      ['§¥1,247,880','§¥155,985','§¥271,351','§¥138,490','§¥102,704','§¥113,948','§¥127,880']
+    ]
+  };
+  frames.forEach((frame,i)=>{frame.label=finalFrameMeta[i][0];frame.alt=finalFrameMeta[i][0];frame.highlight=highlights[i];frame.caption=finalFrameMeta[i][1];frame.src=landingRealUiPreview(i,Lz,realPreviewData);});
   const set=(id2,txt)=>{const el=document.getElementById(id2);if(el)el.textContent=txt;};
   set('lnd6-title',Lz('预算制作六步速览','Six-step budget overview','Vista rápida del presupuesto en seis pasos'));
   set('lnd6-copy',Lz('点击 1–6 步，快速查看对应的系统页面。','Select steps 1–6 to quickly preview each system page.','Selecciona los pasos 1–6 para ver rápidamente cada página del sistema.'));
-  const stage=document.getElementById('lnd6-stage'),image=document.getElementById('lnd6-screen'),caption=document.getElementById('lnd6-caption');
-  const tabs=Array.from(root.querySelectorAll('.lnd6-tab')),switches=Array.from(root.querySelectorAll('.lnd6-switch')),visibleTablist=document.getElementById('lnd6-visible-tabs');
+  const stage=document.getElementById('lnd6-stage'),image=document.getElementById('lnd6-screen'),highlight=document.getElementById('lnd6-highlight'),caption=document.getElementById('lnd6-caption');
+  const switches=Array.from(root.querySelectorAll('.lnd6-switch')),visibleTablist=document.getElementById('lnd6-visible-tabs');
   if(visibleTablist)visibleTablist.setAttribute('aria-label',Lz('预算制作六步速览','Six-step budget overview','Vista rápida del presupuesto en seis pasos'));
   function playCursor(){root.classList.remove('is-animating');void root.offsetWidth;root.classList.add('is-animating');window.clearTimeout(root._lnd6MotionTimer);root._lnd6MotionTimer=window.setTimeout(()=>root.classList.remove('is-animating'),1660);}
   // Keep the preview frame immobile when a step changes. Only the selected native tab,
@@ -11199,15 +11450,14 @@ function renderLandingWorkflow(){
   frames.forEach(frame=>{const preload=new Image();preload.src=frame.src;});
   function showStep(index,animate){
     const safe=Math.max(0,Math.min(frames.length-1,Number(index)||0)),frame=frames[safe];
-    image.src=frame.src;image.alt=frame.alt;caption.textContent=frame.caption;stage.setAttribute('aria-labelledby','lnd6-switch-'+(safe+1));
-    tabs.forEach((tab,i)=>{tab.setAttribute('aria-label',frames[i].label);const label=tab.querySelector('span');if(label)label.textContent=frames[i].label;});
+    image.src=frame.src;image.alt=frame.alt;if(highlight)highlight.textContent=frame.highlight;caption.textContent=frame.caption;stage.setAttribute('aria-labelledby','lnd6-switch-'+(safe+1));
     switches.forEach((tab,i)=>{tab.setAttribute('aria-selected',String(i===safe));tab.setAttribute('tabindex',i===safe?'0':'-1');tab.setAttribute('aria-label',(i+1)+'. '+frames[i].label);const label=tab.querySelector('span');if(label)label.textContent=frames[i].label;});
     root.dataset.lnd6Index=String(safe);stage.classList.remove('is-changing');
     if(animate)playCursor();
   }
   root._lnd6ShowStep=showStep;
   if(!root._lnd6Bound){
-    tabs.concat(switches).forEach(tab=>tab.addEventListener('click',()=>root._lnd6ShowStep(Number(tab.dataset.lnd6Index),true)));
+    switches.forEach(tab=>tab.addEventListener('click',()=>root._lnd6ShowStep(Number(tab.dataset.lnd6Index),true)));
     switches.forEach(tab=>tab.addEventListener('keydown',function(e){
       const at=Number(tab.dataset.lnd6Index),last=switches.length-1;let next=at;
       if(e.key==='ArrowRight'||e.key==='ArrowDown')next=(at+1)%switches.length;
@@ -11231,6 +11481,7 @@ try{ localStorage.removeItem('qpnl_autosave'); }catch(e){}
 function startNew(){
   isDemo=false;
   state=defaultState();
+  resetStepCityViews();
   DIAMOND=null; DM_INIT=false;
   state.shows=[];   // [v3.7.23] 不再放空白占位场次；用户在日历上添加演出（避免占位场干扰场数/总停留天数等计算）
   state.activeShowIdx=0;
@@ -11385,6 +11636,7 @@ function loadDemo(){
   isDemo=true;
   try{ const b=document.getElementById('demo-banner-inner'); if(b&&!b._zh) b._zh=b.innerHTML; if(b) b.innerHTML=translate(b._zh); }catch(e){}   // [v3.8.231] 横幅三语
   state=getDemoState(); migrateGuaToCNY(state);
+  resetStepCityViews();
   (state.shows||[]).forEach(sh=>{ sh.platforms=[{k:'xiudong_lh',flat:10}]; });   // [v3.8.213] demo全场秀动LH固定¥10/场
   demoEnrichV205(state);
   // Sellable 是票档规划中真正可售的库存，不是预测售出量。Demo 无封票/预留/赠票时即等于票档总数。
@@ -11438,6 +11690,7 @@ function loadDemo(){
 function loadCodexTestData(){
   isDemo=false;
   state=defaultState();
+  resetStepCityViews();
   state.projectName='The Sold Outs 2026 China Tour · Codex Regression Test';
   state.artist='The SO';
   state.agency='Test Agency';
@@ -11558,6 +11811,7 @@ function handleFileLoad(e){
       const data=migrateTo326(JSON.parse(ev.target.result));
       isDemo=false;
       state=Object.assign(defaultState(),data); migrateGuaToCNY(state);
+      resetStepCityViews();
       DIAMOND=null; DM_INIT=false;
       // [v3.8.253] 档案带自建场馆 → 直接并入本机库（去掉旧的写入确认弹窗）。
       // saveUserVenue 按「城市+名称」去重：本机已有的原地更新、没有的自动加，并落 localStorage。
